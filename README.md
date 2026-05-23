@@ -1,16 +1,27 @@
 # Document Template Builder
 
+Will we get rich from this? Who Knows..
+
 FastAPI + PostgreSQL + S3 service for building, tagging, and rendering document templates.
 
 ## Setup
 
+Setup VSCode and connect your github. Clone the repo in and then you get get started. All this shit below you can basically paste into the terminal and it will set up the shit for you.
+Also, i will send you the env file codes seperately. These are AWS secretes that only we should have, so they cannot be on a public repo. But I've included an example file of what it looks like. The real env file you can just remove the .example in the file and paste the given codes i give you.
+
+See the below, Cheers!
+
 ```bash
-# 1. Install dependencies
+# 1. Create and activate a virtual environment
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
+# 2. Install dependencies
 pip install -r requirements.txt
 
 # 2. Configure environment
-cp .env .env.local   # edit with your real values
-# DATABASE_URL, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET_NAME
+cp .env.example .env   # edit with your real values
+# DATABASE_URL, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, S3_BUCKET_NAME, SECRET_KEY
 
 # 3. Create the database
 createdb template_builder
