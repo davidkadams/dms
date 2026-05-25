@@ -1,8 +1,20 @@
 # Document Template Builder
 
-Will we get rich from this? Who Knows..
+David's Evil Creation
 
 FastAPI + PostgreSQL + S3 service for building, tagging, and rendering document templates.
+
+# Workflow Visualzation
+
+```mermaid
+flowchart TD
+    A[User Creates A Schema] --> B[User Uploads Template]
+    B --> C[User Maps the tokens to the document]
+    C --> D[User approves Document *PATCH*]
+    D --> E[User creates or pulls data instance]
+    E --> F[User Generates Document using data instance]
+    F --> G[User Downloads Document]
+```
 
 ## Setup
 
