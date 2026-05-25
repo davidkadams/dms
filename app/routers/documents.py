@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.generated_document import GeneratedDocument
+from app.models.template import Template
 from app.schemas_pydantic.document import GenerateDocumentRequest, GeneratedDocumentResponse
 from app.services.document_renderer import render_document
 from app.services.s3 import generate_presigned_url
@@ -16,10 +17,15 @@ def generate_document(
     x_user_id: UUID = Header(...),
     db: Session = Depends(get_db),
 ):
-    s3_key = render_document(payload.template_id, payload.data_record_id, db)
+    template = db.get(Template, payload.template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    if template.status != "active":
+        raise HTTPException(status_code=400, detail="Template must be activated before generating documents")
+    s3_key = render_document(payload.template_id, payload.data_instance_id, db)
     doc = GeneratedDocument(
         template_id=payload.template_id,
-        data_record_id=payload.data_record_id,
+        data_instance_id=payload.data_instance_id,
         s3_key=s3_key,
         created_by=x_user_id,
     )

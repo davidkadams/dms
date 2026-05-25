@@ -6,13 +6,13 @@ from pydantic import BaseModel
 
 class GenerateDocumentRequest(BaseModel):
     template_id: UUID
-    data_record_id: UUID
+    data_instance_id: UUID
 
 
 class GeneratedDocumentResponse(BaseModel):
     id: UUID
     template_id: UUID
-    data_record_id: UUID
+    data_instance_id: UUID
     s3_key: str
     download_url: Optional[str] = None
     created_at: datetime

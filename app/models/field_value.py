@@ -9,11 +9,11 @@ from app.database import Base
 class FieldValue(Base):
     __tablename__ = "field_values"
     __table_args__ = (
-        UniqueConstraint("data_record_id", "schema_field_id", name="uq_field_value_record_field"),
+        UniqueConstraint("data_instance_id", "schema_field_id", name="uq_field_value_instance_field"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    data_record_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("data_records.id"), nullable=False, index=True)
+    data_instance_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("data_instances.id"), nullable=False, index=True)
     schema_field_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("schema_fields.id"), nullable=False)
     value: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
@@ -22,5 +22,5 @@ class FieldValue(Base):
         nullable=False,
     )
 
-    data_record: Mapped["DataRecord"] = relationship("DataRecord", back_populates="field_values")
+    data_instance: Mapped["DataInstance"] = relationship("DataInstance", back_populates="field_values")
     schema_field: Mapped["SchemaField"] = relationship("SchemaField", back_populates="field_values")

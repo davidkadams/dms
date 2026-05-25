@@ -11,7 +11,7 @@ class FieldValueCreate(BaseModel):
 
 class FieldValueResponse(BaseModel):
     id: UUID
-    data_record_id: UUID
+    data_instance_id: UUID
     schema_field_id: UUID
     value: str
     created_at: datetime
@@ -19,13 +19,13 @@ class FieldValueResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class DataRecordCreate(BaseModel):
+class DataInstanceCreate(BaseModel):
     schema_id: UUID
     label: str
     field_values: List[FieldValueCreate] = []
 
 
-class DataRecordResponse(BaseModel):
+class DataInstanceResponse(BaseModel):
     id: UUID
     schema_id: UUID
     label: str

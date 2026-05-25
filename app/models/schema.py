@@ -24,4 +24,4 @@ class Schema(Base):
         "SchemaField", back_populates="schema", cascade="all, delete-orphan", order_by="SchemaField.display_order"
     )
     templates: Mapped[List["Template"]] = relationship("Template", back_populates="schema")
-    data_records: Mapped[List["DataRecord"]] = relationship("DataRecord", back_populates="schema")
+    data_instances: Mapped[List["DataInstance"]] = relationship("DataInstance", back_populates="schema")
