@@ -124,7 +124,7 @@ export default function ViewTemplatesPage() {
         <div style={{ border: "1px solid #c8c4be", background: "#fff", borderRadius: 2 }}>
           {/* Header */}
           <div style={{ display: "flex", background: "#1a1a2e", padding: "6px 12px" }}>
-            {[{ label: "Name", flex: 1.8 }, { label: "Schema", flex: 1.4 }, { label: "Status", flex: 0.8 }, { label: "Created", flex: 0.9 }, { label: "Actions", flex: 1.2, textAlign: "right" }].map((col) => (
+            {[{ label: "Name", flex: 1.8 }, { label: "Schema", flex: 1.4 }, { label: "Status", flex: 0.8 }, { label: "Created", flex: 0.9 }, { label: "Actions", flex: 1.6, textAlign: "right" }].map((col) => (
               <span key={col.label} style={{ flex: col.flex, fontSize: 11, fontWeight: 600, color: "#a0a0c0", textAlign: col.textAlign || "left" }}>
                 {col.label}
               </span>
@@ -162,7 +162,13 @@ export default function ViewTemplatesPage() {
                 <span style={{ flex: 0.9, fontSize: 11, color: "#999" }}>
                   {new Date(t.created_at).toLocaleDateString()}
                 </span>
-                <div style={{ flex: 1.2, display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                <div style={{ flex: 1.6, display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                  <button
+                    onClick={() => router.push(`/template-studio/templates/${t.id}/tokens`)}
+                    style={{ padding: "3px 10px", fontSize: 11, background: "#e8eaf6", color: "#3949ab", border: "1px solid #9fa8da", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+                  >
+                    Edit
+                  </button>
                   {t.status !== "active" && (
                     <button
                       onClick={() => handleActivate(t.id)}

@@ -5,7 +5,8 @@ from app.database import get_db
 from app.models.template import Template
 from app.models.token_mapping import TokenMapping
 from app.schemas_pydantic.template import TemplateResponse, TemplateUpdate, TokenMappingCreate, TokenMappingResponse
-from app.services.s3 import delete_file, upload_file
+from fastapi.responses import Response
+from app.services.s3 import delete_file, download_file, generate_presigned_url, upload_file
 
 router = APIRouter()
 
@@ -84,6 +85,18 @@ def activate_template(template_id: UUID, db: Session = Depends(get_db)):
     return template
 
 
+@router.get("/{template_id}/file")
+def get_template_file(template_id: UUID, db: Session = Depends(get_db)):
+    template = db.get(Template, template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    content = download_file(template.s3_key)
+    return Response(
+        content=content,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )
+
+
 @router.post("/{template_id}/token-mappings", response_model=TokenMappingResponse, status_code=201)
 def add_token_mapping(
     template_id: UUID,
@@ -103,3 +116,12 @@ def add_token_mapping(
 @router.get("/{template_id}/token-mappings", response_model=list[TokenMappingResponse])
 def list_token_mappings(template_id: UUID, db: Session = Depends(get_db)):
     return db.query(TokenMapping).filter(TokenMapping.template_id == template_id).all()
+
+
+@router.delete("/{template_id}/token-mappings/{mapping_id}", status_code=204)
+def delete_token_mapping(template_id: UUID, mapping_id: UUID, db: Session = Depends(get_db)):
+    mapping = db.get(TokenMapping, mapping_id)
+    if not mapping or mapping.template_id != template_id:
+        raise HTTPException(status_code=404, detail="Token mapping not found")
+    db.delete(mapping)
+    db.commit()
