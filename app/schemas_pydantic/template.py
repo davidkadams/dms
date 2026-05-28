@@ -15,6 +15,7 @@ class TemplateResponse(BaseModel):
     name: str
     s3_key: str
     status: str
+    is_default: bool
     created_at: datetime
     created_by: UUID
 
