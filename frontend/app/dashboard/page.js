@@ -15,10 +15,11 @@ const MODULES = [
 
 function StatusBadge({ status }) {
   const map = {
-    pending: { label: "Pending", bg: "#fff3e0", color: "#b87800", border: "#f0a500" },
+    pending:            { label: "Pending",      bg: "#fff3e0", color: "#b87800", border: "#f0a500" },
     pending_validation: { label: "Needs Review", bg: "#ede7f6", color: "#5e35b1", border: "#9575cd" },
-    processed: { label: "Done", bg: "#e8f5e9", color: "#2e7d32", border: "#66bb6a" },
-    failed: { label: "Failed", bg: "#fdecea", color: "#c62828", border: "#ef9a9a" },
+    validated:          { label: "Validated",    bg: "#e3f2fd", color: "#1565c0", border: "#90caf9" },
+    processed:          { label: "Processed",    bg: "#e8f5e9", color: "#2e7d32", border: "#66bb6a" },
+    failed:             { label: "Failed",       bg: "#fdecea", color: "#c62828", border: "#ef9a9a" },
   };
   const s = map[status] || map.pending;
   return (
@@ -104,14 +105,23 @@ export default function Dashboard() {
   const { user, logout } = useUser();
   const router = useRouter();
   const [instances, setInstances] = useState([]);
+  const [schemaMap, setSchemaMap] = useState({});
   const [activeNav, setActiveNav] = useState("Dashboard");
+
+  const loadData = () => {
+    Promise.all([
+      fetch(`${API}/data-instances/`).then((r) => r.json()),
+      fetch(`${API}/schemas/`).then((r) => r.json()),
+    ]).then(([inst, schemas]) => {
+      const map = Object.fromEntries(schemas.map((s) => [s.id, s.name]));
+      setSchemaMap(map);
+      setInstances(inst.filter((i) => i.created_by === user.id));
+    }).catch(() => {});
+  };
 
   useEffect(() => {
     if (!user) { router.push("/login"); return; }
-    fetch(`${API}/data-instances/`)
-      .then((r) => r.json())
-      .then(setInstances)
-      .catch(() => {});
+    loadData();
   }, [user, router]);
 
   if (!user) return null;
@@ -174,7 +184,7 @@ export default function Dashboard() {
         <TbBtn onClick={() => router.push("/ingest")}>↑ Upload</TbBtn>
         <TbBtn onClick={() => router.push("/queue")}>≡ Queue</TbBtn>
         <div style={{ width: 1, height: 18, background: "#c8c4be", margin: "0 3px" }} />
-        <TbBtn onClick={() => { setInstances([]); fetch(`${API}/data-instances/`).then(r => r.json()).then(setInstances).catch(() => {}); }}>↻ Refresh</TbBtn>
+        <TbBtn onClick={() => { setInstances([]); loadData(); }}>↻ Refresh</TbBtn>
       </div>
 
       {/* Content */}
@@ -193,7 +203,10 @@ export default function Dashboard() {
         <div style={{ fontSize: 11, fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 8 }}>
           Queue — recent instances
         </div>
-        <QueueTable items={instances.slice(0, 10)} onRowClick={(item) => router.push(`/queue/${item.id}`)} />
+        <QueueTable
+          items={instances.slice(0, 10).map((i) => ({ ...i, schema_name: schemaMap[i.schema_id] || "—" }))}
+          onRowClick={(item) => router.push(`/queue/${item.id}`)}
+        />
       </div>
 
       {/* Status Bar */}

@@ -1,6 +1,6 @@
 from uuid import UUID
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -29,8 +29,12 @@ class DataInstanceResponse(BaseModel):
     id: UUID
     schema_id: UUID
     label: str
+    status: str
+    source: str
     created_at: datetime
     created_by: UUID
+    validated_by: Optional[UUID] = None
+    validated_at: Optional[datetime] = None
     field_values: List[FieldValueResponse] = []
 
     model_config = {"from_attributes": True}

@@ -85,6 +85,22 @@ def activate_template(template_id: UUID, db: Session = Depends(get_db)):
     return template
 
 
+@router.patch("/{template_id}/set-default", response_model=TemplateResponse)
+def set_default_template(template_id: UUID, db: Session = Depends(get_db)):
+    template = db.get(Template, template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    # Clear any existing default for this schema, then set this one
+    db.query(Template).filter(
+        Template.schema_id == template.schema_id,
+        Template.is_default == True,
+    ).update({"is_default": False})
+    template.is_default = True
+    db.commit()
+    db.refresh(template)
+    return template
+
+
 @router.get("/{template_id}/file")
 def get_template_file(template_id: UUID, db: Session = Depends(get_db)):
     template = db.get(Template, template_id)

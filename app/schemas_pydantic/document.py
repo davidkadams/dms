@@ -14,7 +14,6 @@ class GeneratedDocumentResponse(BaseModel):
     template_id: UUID
     data_instance_id: UUID
     s3_key: str
-    download_url: Optional[str] = None
     created_at: datetime
     created_by: UUID
 
