@@ -8,6 +8,7 @@ from app.schemas_pydantic.schema import (
     SchemaCreate,
     SchemaResponse,
     SchemaFieldCreate,
+    SchemaFieldUpdate,
     SchemaFieldResponse,
 )
 
@@ -63,3 +64,24 @@ def list_fields(schema_id: UUID, db: Session = Depends(get_db)):
     if not db.get(Schema, schema_id):
         raise HTTPException(status_code=404, detail="Schema not found")
     return db.query(SchemaField).filter(SchemaField.schema_id == schema_id).order_by(SchemaField.display_order).all()
+
+
+@router.patch("/{schema_id}/fields/{field_id}", response_model=SchemaFieldResponse)
+def update_field(schema_id: UUID, field_id: UUID, payload: SchemaFieldUpdate, db: Session = Depends(get_db)):
+    field = db.get(SchemaField, field_id)
+    if not field or field.schema_id != schema_id:
+        raise HTTPException(status_code=404, detail="Field not found")
+    for key, val in payload.model_dump(exclude_none=True).items():
+        setattr(field, key, val)
+    db.commit()
+    db.refresh(field)
+    return field
+
+
+@router.delete("/{schema_id}/fields/{field_id}", status_code=204)
+def delete_field(schema_id: UUID, field_id: UUID, db: Session = Depends(get_db)):
+    field = db.get(SchemaField, field_id)
+    if not field or field.schema_id != schema_id:
+        raise HTTPException(status_code=404, detail="Field not found")
+    db.delete(field)
+    db.commit()
