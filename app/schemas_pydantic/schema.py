@@ -10,6 +10,16 @@ class SchemaFieldCreate(BaseModel):
     field_type: str  # string | number | date
     required: bool = True
     display_order: int = 0
+    description: Optional[str] = None
+    extraction_hint: Optional[str] = None
+
+
+class SchemaFieldUpdate(BaseModel):
+    label: Optional[str] = None
+    field_type: Optional[str] = None
+    required: Optional[bool] = None
+    description: Optional[str] = None
+    extraction_hint: Optional[str] = None
 
 
 class SchemaFieldResponse(SchemaFieldCreate):

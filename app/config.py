@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     aws_region: str = "us-east-1"
     s3_bucket_name: str
     secret_key: str
+    anthropic_api_key: str
 
     model_config = {"env_file": ".env"}
 

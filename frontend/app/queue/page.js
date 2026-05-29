@@ -42,8 +42,33 @@ export default function QueuePage() {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("");
   const [filterSchema, setFilterSchema] = useState("");
+  const [bulkGenerating, setBulkGenerating] = useState(false);
+  const [bulkResult, setBulkResult] = useState(null);
 
   const schemaMap = Object.fromEntries(schemas.map((s) => [s.id, s.name]));
+
+  const validatedCount = instances.filter((i) => i.status === "validated").length;
+
+  const handleBulkGenerate = async () => {
+    setBulkGenerating(true);
+    setBulkResult(null);
+    try {
+      const res = await fetch(`${API}/documents/generate-bulk`, {
+        method: "POST",
+        headers: { "x-user-id": user.id },
+      });
+      const data = await res.json();
+      setBulkResult(data);
+      // refresh instances so statuses update
+      const [inst] = await Promise.all([
+        fetch(`${API}/data-instances/`).then((r) => r.json()),
+      ]);
+      setInstances(inst.filter((i) => i.created_by === user.id));
+    } catch {
+      setBulkResult({ error: "Could not reach the server." });
+    }
+    setBulkGenerating(false);
+  };
 
   useEffect(() => {
     if (!user) { router.push("/login"); return; }
@@ -66,6 +91,7 @@ export default function QueuePage() {
   const counts = {
     pending: instances.filter((i) => i.status === "pending").length,
     pending_validation: instances.filter((i) => i.status === "pending_validation").length,
+    validated: instances.filter((i) => i.status === "validated").length,
     processed: instances.filter((i) => i.status === "processed").length,
   };
 
@@ -81,13 +107,52 @@ export default function QueuePage() {
             <div style={{ fontSize: 22, fontWeight: 500, color: "#1a1020", letterSpacing: -0.3 }}>Queue</div>
             <div style={{ fontSize: 12, color: "#888", marginTop: 3 }}>Data instances ready for document generation</div>
           </div>
-          <button
-            onClick={() => router.push("/data-instances/new")}
-            style={{ padding: "8px 16px", fontSize: 12, fontWeight: 600, background: "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
-          >
-            + New Entry
-          </button>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {validatedCount > 0 && (
+              <button
+                onClick={handleBulkGenerate}
+                disabled={bulkGenerating}
+                style={{ padding: "8px 14px", fontSize: 12, fontWeight: 600, background: bulkGenerating ? "#ccc" : "#2e7d32", color: "#fff", border: "none", borderRadius: 2, cursor: bulkGenerating ? "default" : "pointer", fontFamily: "inherit" }}
+              >
+                {bulkGenerating ? "Generating…" : `Generate All Validated (${validatedCount})`}
+              </button>
+            )}
+            <button
+              onClick={() => router.push("/data-instances/new")}
+              style={{ padding: "8px 16px", fontSize: 12, fontWeight: 600, background: "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+            >
+              + New Entry
+            </button>
+          </div>
         </div>
+
+        {/* Bulk generate result banner */}
+        {bulkResult && !bulkResult.error && (
+          <div style={{ marginBottom: 16, padding: "12px 16px", background: bulkResult.total_generated > 0 ? "#e8f5e9" : "#fff3e0", border: `1px solid ${bulkResult.total_generated > 0 ? "#66bb6a" : "#f0a500"}`, borderRadius: 2 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: bulkResult.total_generated > 0 ? "#2e7d32" : "#b87800", marginBottom: bulkResult.total_skipped > 0 ? 8 : 0 }}>
+              {bulkResult.total_generated > 0
+                ? `${bulkResult.total_generated} document${bulkResult.total_generated !== 1 ? "s" : ""} generated`
+                : "No documents generated"}
+              {bulkResult.total_skipped > 0 && ` — ${bulkResult.total_skipped} skipped`}
+            </div>
+            {bulkResult.skipped?.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                {bulkResult.skipped.map((s) => (
+                  <div key={s.instance_id} style={{ fontSize: 11, color: "#b87800" }}>
+                    <strong>{s.label}</strong> — {s.reason === "no default template" ? "no default template set" : s.reason}
+                  </div>
+                ))}
+              </div>
+            )}
+            <button onClick={() => setBulkResult(null)} style={{ marginTop: 8, fontSize: 10, background: "none", border: "none", cursor: "pointer", color: "#aaa", fontFamily: "inherit", padding: 0 }}>Dismiss</button>
+          </div>
+        )}
+        {bulkResult?.error && (
+          <div style={{ marginBottom: 16, padding: "12px 16px", background: "#fdecea", border: "1px solid #ef9a9a", borderRadius: 2, fontSize: 12, color: "#c62828" }}>
+            {bulkResult.error}
+            <button onClick={() => setBulkResult(null)} style={{ marginLeft: 12, fontSize: 10, background: "none", border: "none", cursor: "pointer", color: "#aaa", fontFamily: "inherit", padding: 0 }}>Dismiss</button>
+          </div>
+        )}
 
         {/* Status summary pills */}
         <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
@@ -95,6 +160,7 @@ export default function QueuePage() {
             { key: "", label: `All  ${instances.length}` },
             { key: "pending", label: `Pending  ${counts.pending}` },
             { key: "pending_validation", label: `Needs Review  ${counts.pending_validation}` },
+            { key: "validated", label: `Validated  ${counts.validated}` },
             { key: "processed", label: `Processed  ${counts.processed}` },
           ].map((f) => {
             const active = filterStatus === f.key;
