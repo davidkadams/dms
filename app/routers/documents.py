@@ -41,6 +41,59 @@ def generate_document(
     return doc
 
 
+@router.post("/generate-bulk")
+def generate_bulk(
+    x_user_id: UUID = Header(...),
+    db: Session = Depends(get_db),
+):
+    """
+    Generate documents for all validated instances that have a default template.
+    Skips instances where no active default template exists for the schema.
+    """
+    validated = (
+        db.query(DataInstance)
+        .filter(DataInstance.created_by == x_user_id, DataInstance.status == "validated")
+        .all()
+    )
+
+    generated = []
+    skipped = []
+
+    for instance in validated:
+        default_template = (
+            db.query(Template)
+            .filter(
+                Template.schema_id == instance.schema_id,
+                Template.is_default == True,
+                Template.status == "active",
+            )
+            .first()
+        )
+        if not default_template:
+            skipped.append({"instance_id": str(instance.id), "label": instance.label, "reason": "no default template"})
+            continue
+
+        try:
+            s3_key = render_document(default_template.id, instance.id, db)
+        except Exception as e:
+            skipped.append({"instance_id": str(instance.id), "label": instance.label, "reason": str(e)})
+            continue
+
+        doc = GeneratedDocument(
+            template_id=default_template.id,
+            data_instance_id=instance.id,
+            s3_key=s3_key,
+            created_by=x_user_id,
+        )
+        db.add(doc)
+        instance.status = "processed"
+        db.flush()
+        generated.append({"instance_id": str(instance.id), "label": instance.label, "document_id": str(doc.id)})
+
+    db.commit()
+    return {"generated": generated, "skipped": skipped, "total_generated": len(generated), "total_skipped": len(skipped)}
+
+
 @router.get("/", response_model=list[GeneratedDocumentResponse])
 def list_documents(db: Session = Depends(get_db)):
     return db.query(GeneratedDocument).all()

@@ -12,6 +12,23 @@ from app.services.llm_extractor import match_schema, extract_fields
 router = APIRouter()
 
 
+@router.post("/prepare")
+async def prepare_document(
+    file: UploadFile = File(...),
+    x_user_id: UUID = Header(...),
+):
+    """
+    Extract text from a document without running LLM matching.
+    Used when the user already knows which schema to use.
+    """
+    content = await file.read()
+    try:
+        document_text = extract_text(content, file.filename)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"document_text": document_text, "filename": file.filename}
+
+
 @router.post("/match")
 async def match_document(
     file: UploadFile = File(...),
@@ -38,7 +55,10 @@ async def match_document(
             "fields": [{"name": f.name, "field_type": f.field_type} for f in fields],
         })
 
-    result = match_schema(document_text, schema_dicts)
+    try:
+        result = match_schema(document_text, schema_dicts)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"LLM matching failed: {str(e)}")
     return {
         **result,
         "document_text": document_text,
@@ -78,7 +98,10 @@ async def extract_document(
         for f in fields
     ]
 
-    extracted = extract_fields(document_text, field_defs)
+    try:
+        extracted = extract_fields(document_text, field_defs)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"LLM extraction failed: {str(e)}")
 
     instance = DataInstance(
         schema_id=schema_uuid,
