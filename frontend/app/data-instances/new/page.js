@@ -4,22 +4,25 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "../../context/UserContext";
 import NavShell from "../../components/NavShell";
+import {
+  bgPrimary, bgCard, bgDeep,
+  textPrimary, textSubtle, textMuted, textLabel,
+  accentTeal, accentBlue, accentGreen, accentRed,
+  borderCard,
+  btnPrimary, btnDisabled, btnGhost, inputStyle,
+} from "../../theme";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 function FieldInput({ field, value, onChange }) {
-  const base = {
-    width: "100%", padding: "8px 10px", fontSize: 13,
-    border: "1px solid #c8c4be", borderRadius: 2,
-    fontFamily: "inherit", outline: "none", background: "#fafafa",
-  };
+  const base = { ...inputStyle, width: "100%", padding: "8px 10px", fontSize: 13 };
 
   return (
     <div style={{ marginBottom: 18 }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 5 }}>
-        <label style={{ fontSize: 12, fontWeight: 600, color: "#1a1020" }}>{field.label}</label>
-        <span style={{ fontSize: 10, color: "#aaa" }}>{field.field_type}</span>
-        {field.required && <span style={{ fontSize: 10, color: "#c0392b" }}>required</span>}
+        <label style={{ fontSize: 12, fontWeight: 600, color: textPrimary }}>{field.label}</label>
+        <span style={{ fontSize: 10, color: textLabel }}>{field.field_type}</span>
+        {field.required && <span style={{ fontSize: 10, color: accentRed }}>required</span>}
       </div>
       {field.field_type === "date" ? (
         <input type="date" value={value} onChange={(e) => onChange(e.target.value)} style={base} />
@@ -107,23 +110,29 @@ export default function NewDataInstancePage() {
 
   return (
     <NavShell active="Queue">
-      <div style={{ padding: "24px", maxWidth: 680 }}>
-        <div style={{ fontSize: 11, color: "#999", marginBottom: 16, cursor: "pointer" }} onClick={() => router.push("/queue")}>
+      <div style={{ background: bgPrimary, flex: 1, padding: "24px" }}>
+        <div style={{ maxWidth: 680 }}>
+        <div
+          style={{ fontSize: 11, color: textLabel, marginBottom: 16, cursor: "pointer" }}
+          onClick={() => router.push("/queue")}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = textLabel)}
+        >
           ← Queue
         </div>
 
-        <div style={{ fontSize: 22, fontWeight: 500, color: "#1a1020", letterSpacing: -0.3, marginBottom: 4 }}>New Data Entry</div>
-        <div style={{ fontSize: 12, color: "#888", marginBottom: 28 }}>Manually enter data to be merged into a document template.</div>
+        <div style={{ fontSize: 22, fontWeight: 500, color: textPrimary, letterSpacing: -0.3, marginBottom: 4 }}>New Data Entry</div>
+        <div style={{ fontSize: 12, color: textMuted, marginBottom: 28 }}>Manually enter data to be merged into a document template.</div>
 
         {/* Step 1 — Pick a schema */}
         <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: textLabel, textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 12 }}>
             Step 1 — Select a Schema
           </div>
           {schemas.length === 0 ? (
-            <div style={{ fontSize: 12, color: "#c0392b" }}>
+            <div style={{ fontSize: 12, color: accentRed }}>
               No schemas found.{" "}
-              <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => router.push("/schema-builder/new")}>
+              <span style={{ cursor: "pointer", textDecoration: "underline", color: accentBlue }} onClick={() => router.push("/schema-builder/new")}>
                 Create one first →
               </span>
             </div>
@@ -137,14 +146,14 @@ export default function NewDataInstancePage() {
                     onClick={() => handleSchemaSelect(s)}
                     style={{
                       padding: "10px 16px", cursor: "pointer", borderRadius: 2,
-                      border: `1px solid ${active ? "#1a1a2e" : "#c8c4be"}`,
-                      background: active ? "#1a1a2e" : "#fff",
+                      border: `1px solid ${active ? accentTeal : "rgba(255,255,255,0.12)"}`,
+                      background: active ? "rgba(0,191,179,0.12)" : "rgba(255,255,255,0.04)",
                       transition: "all 0.1s",
                     }}
                   >
-                    <div style={{ fontSize: 12, fontWeight: 600, color: active ? "#fff" : "#1a1020" }}>{s.name}</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: active ? accentTeal : textPrimary }}>{s.name}</div>
                     {s.description && (
-                      <div style={{ fontSize: 11, color: active ? "rgba(255,255,255,0.5)" : "#aaa", marginTop: 2 }}>{s.description}</div>
+                      <div style={{ fontSize: 11, color: active ? "rgba(0,191,179,0.6)" : "rgba(255,255,255,0.4)", marginTop: 2 }}>{s.description}</div>
                     )}
                   </div>
                 );
@@ -156,41 +165,41 @@ export default function NewDataInstancePage() {
         {/* Step 2 — Fill in the data */}
         {selectedSchema && (
           <>
-            <div style={{ borderTop: "1px solid #e0ddd9", paddingTop: 24, marginBottom: 24 }}>
+            <div style={{ borderTop: borderCard, paddingTop: 24, marginBottom: 24 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: 0.7 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: textLabel, textTransform: "uppercase", letterSpacing: 0.7 }}>
                   Step 2 — Fill in Data
-                  <span style={{ fontWeight: 400, textTransform: "none", marginLeft: 8, color: "#bbb" }}>
+                  <span style={{ fontWeight: 400, textTransform: "none", marginLeft: 8, color: textMuted }}>
                     {selectedSchema.name}
                   </span>
                 </div>
                 {fields.length > 0 && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ width: 80, height: 4, background: "#e0ddd9", borderRadius: 2, overflow: "hidden" }}>
-                      <div style={{ width: `${progress}%`, height: "100%", background: progress === 100 ? "#2e7d32" : "#1a1a2e", transition: "width 0.2s" }} />
+                    <div style={{ width: 80, height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
+                      <div style={{ width: `${progress}%`, height: "100%", background: progress === 100 ? accentGreen : accentTeal, transition: "width 0.2s" }} />
                     </div>
-                    <span style={{ fontSize: 10, color: "#aaa" }}>{filledCount}/{fields.length}</span>
+                    <span style={{ fontSize: 10, color: textLabel }}>{filledCount}/{fields.length}</span>
                   </div>
                 )}
               </div>
 
               {/* Label */}
-              <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: "1px solid #f0eeeb" }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "#1a1020", marginBottom: 5 }}>
-                  Entry Label <span style={{ fontSize: 10, color: "#c0392b" }}>required</span>
+              <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: borderCard }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: textPrimary, marginBottom: 5 }}>
+                  Entry Label <span style={{ fontSize: 10, color: accentRed }}>required</span>
                 </div>
                 <input
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
                   placeholder={`e.g. Acme Corp – ${selectedSchema.name} – May 2026`}
-                  style={{ width: "100%", padding: "8px 10px", fontSize: 13, border: "1px solid #c8c4be", borderRadius: 2, fontFamily: "inherit", outline: "none", background: "#fafafa" }}
+                  style={{ ...inputStyle, width: "100%", padding: "8px 10px", fontSize: 13 }}
                 />
-                <div style={{ fontSize: 10, color: "#bbb", marginTop: 4 }}>A short descriptive name to identify this entry in the queue.</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>A short descriptive name to identify this entry in the queue.</div>
               </div>
 
               {/* Fields */}
               {loadingFields ? (
-                <div style={{ fontSize: 12, color: "#999" }}>Loading fields...</div>
+                <div style={{ fontSize: 12, color: textMuted }}>Loading fields...</div>
               ) : (
                 fields.map((field) => (
                   <FieldInput
@@ -203,25 +212,26 @@ export default function NewDataInstancePage() {
               )}
             </div>
 
-            {error && <div style={{ fontSize: 12, color: "#c62828", marginBottom: 14 }}>{error}</div>}
+            {error && <div style={{ fontSize: 12, color: accentRed, marginBottom: 14 }}>{error}</div>}
 
             <div style={{ display: "flex", gap: 8 }}>
               <button
                 onClick={() => router.push("/queue")}
-                style={{ padding: "9px 18px", fontSize: 12, background: "#f0eeeb", border: "1px solid #c8c4be", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+                style={{ ...btnGhost, padding: "9px 18px", fontSize: 12 }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={saving}
-                style={{ padding: "9px 24px", fontSize: 13, fontWeight: 600, background: saving ? "#ccc" : "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: saving ? "not-allowed" : "pointer", fontFamily: "inherit" }}
+                style={{ ...(saving ? btnDisabled : btnPrimary), padding: "9px 24px", fontSize: 13 }}
               >
                 {saving ? "Saving..." : "Add to Queue →"}
               </button>
             </div>
           </>
         )}
+        </div>
       </div>
     </NavShell>
   );

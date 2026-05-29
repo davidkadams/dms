@@ -4,6 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "../../context/UserContext";
 import NavShell from "../../components/NavShell";
+import {
+  bgPrimary, bgCard, bgDeep, bgRowAlt,
+  textPrimary, textSecondary, textMuted, textLabel, textDim,
+  accentBlue, accentGreen, accentRed,
+  borderCard, colorBorderInput,
+  btnPrimary, btnGhost, selectStyle,
+} from "../../theme";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -79,31 +86,36 @@ export default function ViewTemplatesPage() {
 
   return (
     <NavShell active="Template Studio">
-      <div style={{ padding: "24px", maxWidth: 800 }}>
-        <div style={{ fontSize: 11, color: "#999", marginBottom: 16, cursor: "pointer" }} onClick={() => router.push("/template-studio")}>
+      <div style={{ background: bgPrimary, flex: 1, padding: "24px" }}>
+        <div style={{ maxWidth: 800 }}>
+        <div
+          style={{ fontSize: 11, color: textLabel, marginBottom: 16, cursor: "pointer" }}
+          onClick={() => router.push("/template-studio")}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = textLabel)}
+        >
           ← Template Studio
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
           <div>
-            <div style={{ fontSize: 20, fontWeight: 500, color: "#1a1020" }}>Templates</div>
-            <div style={{ fontSize: 12, color: "#888", marginTop: 3 }}>{templates.length} template{templates.length !== 1 ? "s" : ""}</div>
+            <div style={{ fontSize: 20, fontWeight: 500, color: textPrimary }}>Templates</div>
+            <div style={{ fontSize: 12, color: textMuted, marginTop: 3 }}>{templates.length} template{templates.length !== 1 ? "s" : ""}</div>
           </div>
           <button
             onClick={() => router.push("/template-studio/upload")}
-            style={{ padding: "7px 14px", fontSize: 12, fontWeight: 600, background: "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+            style={{ ...btnPrimary, padding: "7px 14px", fontSize: 12 }}
           >
             ↑ Upload Template
           </button>
         </div>
 
-        {/* Schema Filter */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#888" }}>Filter by schema:</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: textMuted }}>Filter by schema:</span>
           <select
             value={filterSchemaId}
             onChange={(e) => handleFilterChange(e.target.value)}
-            style={{ padding: "5px 10px", fontSize: 12, border: "1px solid #c8c4be", borderRadius: 2, background: "#fff", fontFamily: "inherit", cursor: "pointer" }}
+            style={{ ...selectStyle, padding: "5px 10px", fontSize: 12, background: bgCard }}
           >
             <option value="">All schemas</option>
             {schemas.map((s) => (
@@ -113,17 +125,15 @@ export default function ViewTemplatesPage() {
           {filterSchemaId && (
             <button
               onClick={() => handleFilterChange("")}
-              style={{ fontSize: 11, color: "#888", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontFamily: "inherit" }}
+              style={{ fontSize: 11, color: textMuted, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontFamily: "inherit" }}
             >
               Clear
             </button>
           )}
         </div>
 
-        {/* Table */}
-        <div style={{ border: "1px solid #c8c4be", background: "#fff", borderRadius: 2 }}>
-          {/* Header */}
-          <div style={{ display: "flex", background: "#1a1a2e", padding: "6px 12px" }}>
+        <div style={{ border: "1px solid rgba(255,255,255,0.08)", background: bgCard, borderRadius: 2 }}>
+          <div style={{ display: "flex", background: bgDeep, padding: "6px 12px" }}>
             {[{ label: "Name", flex: 1.8 }, { label: "Schema", flex: 1.4 }, { label: "Status", flex: 0.8 }, { label: "Created", flex: 0.9 }, { label: "Actions", flex: 1.6, textAlign: "right" }].map((col) => (
               <span key={col.label} style={{ flex: col.flex, fontSize: 11, fontWeight: 600, color: "#a0a0c0", textAlign: col.textAlign || "left" }}>
                 {col.label}
@@ -131,14 +141,14 @@ export default function ViewTemplatesPage() {
             ))}
           </div>
 
-          {loading && <div style={{ padding: "16px 12px", fontSize: 12, color: "#999" }}>Loading...</div>}
+          {loading && <div style={{ padding: "16px 12px", fontSize: 12, color: textMuted }}>Loading...</div>}
 
           {!loading && templates.length === 0 && (
             <div style={{ padding: "24px 12px", textAlign: "center" }}>
-              <div style={{ fontSize: 12, color: "#888", marginBottom: 12 }}>No templates found.</div>
+              <div style={{ fontSize: 12, color: textMuted, marginBottom: 12 }}>No templates found.</div>
               <button
                 onClick={() => router.push("/template-studio/upload")}
-                style={{ padding: "7px 14px", fontSize: 12, background: "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+                style={{ ...btnPrimary, padding: "7px 14px", fontSize: 12 }}
               >
                 Upload your first template →
               </button>
@@ -147,25 +157,23 @@ export default function ViewTemplatesPage() {
 
           {templates.map((t, i) => (
             <div key={t.id}>
-              <div
-                style={{ display: "flex", alignItems: "center", padding: "8px 12px", borderBottom: "1px solid #eee", background: i % 2 === 1 ? "#fafafa" : "#fff" }}
-              >
-                <span style={{ flex: 1.8, fontSize: 12, fontWeight: 500, color: "#1a1020", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <div style={{ display: "flex", alignItems: "center", padding: "8px 12px", borderBottom: "1px solid rgba(255,255,255,0.05)", background: i % 2 === 1 ? bgRowAlt : bgCard }}>
+                <span style={{ flex: 1.8, fontSize: 12, fontWeight: 500, color: textPrimary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {t.name}
                 </span>
-                <span style={{ flex: 1.4, fontSize: 11, color: "#666", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {schemaMap[t.schema_id] || <span style={{ fontFamily: "monospace", fontSize: 10, color: "#bbb" }}>{t.schema_id.substring(0, 14)}…</span>}
+                <span style={{ flex: 1.4, fontSize: 11, color: textSecondary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {schemaMap[t.schema_id] || <span style={{ fontFamily: "monospace", fontSize: 10, color: textDim }}>{t.schema_id.substring(0, 14)}…</span>}
                 </span>
                 <span style={{ flex: 0.8 }}>
                   <StatusBadge status={t.status} />
                 </span>
-                <span style={{ flex: 0.9, fontSize: 11, color: "#999" }}>
+                <span style={{ flex: 0.9, fontSize: 11, color: textLabel }}>
                   {new Date(t.created_at).toLocaleDateString()}
                 </span>
                 <div style={{ flex: 1.6, display: "flex", gap: 6, justifyContent: "flex-end" }}>
                   <button
                     onClick={() => router.push(`/template-studio/templates/${t.id}/tokens`)}
-                    style={{ padding: "3px 10px", fontSize: 11, background: "#e8eaf6", color: "#3949ab", border: "1px solid #9fa8da", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+                    style={{ padding: "3px 10px", fontSize: 11, background: "rgba(144,202,249,0.12)", color: accentBlue, border: "1px solid rgba(144,202,249,0.25)", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
                   >
                     Edit
                   </button>
@@ -173,28 +181,27 @@ export default function ViewTemplatesPage() {
                     <button
                       onClick={() => handleActivate(t.id)}
                       disabled={activatingId === t.id}
-                      style={{ padding: "3px 10px", fontSize: 11, background: "#e8f5e9", color: "#2e7d32", border: "1px solid #66bb6a", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+                      style={{ padding: "3px 10px", fontSize: 11, background: "rgba(129,199,132,0.12)", color: accentGreen, border: "1px solid rgba(129,199,132,0.25)", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
                     >
                       {activatingId === t.id ? "..." : "Activate"}
                     </button>
                   )}
                   {t.status === "active" && (
-                    <span style={{ padding: "3px 10px", fontSize: 11, color: "#aaa" }}>Active</span>
+                    <span style={{ padding: "3px 10px", fontSize: 11, color: textLabel }}>Active</span>
                   )}
                   <button
                     onClick={() => setConfirmDelete(t.id)}
-                    style={{ padding: "3px 10px", fontSize: 11, background: "#fdecea", color: "#c62828", border: "1px solid #ef9a9a", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+                    style={{ padding: "3px 10px", fontSize: 11, background: "rgba(239,154,154,0.12)", color: accentRed, border: "1px solid rgba(239,154,154,0.25)", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
                   >
                     Delete
                   </button>
                 </div>
               </div>
 
-              {/* Inline confirm delete */}
               {confirmDelete === t.id && (
-                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", background: "#fff8f8", borderBottom: "1px solid #f9d6d6" }}>
-                  <span style={{ fontSize: 12, color: "#c62828", flex: 1 }}>
-                    Delete <strong>{t.name}</strong>? This also removes the file from S3.
+                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", background: "rgba(239,154,154,0.07)", borderBottom: "1px solid rgba(239,154,154,0.15)" }}>
+                  <span style={{ fontSize: 12, color: accentRed, flex: 1 }}>
+                    Delete <strong>{t.name}</strong>? This also removes the file from storage.
                   </span>
                   <button
                     onClick={() => handleDelete(t.id)}
@@ -205,7 +212,7 @@ export default function ViewTemplatesPage() {
                   </button>
                   <button
                     onClick={() => setConfirmDelete(null)}
-                    style={{ padding: "4px 10px", fontSize: 11, background: "#f0eeeb", border: "1px solid #c8c4be", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+                    style={{ ...btnGhost, padding: "4px 10px", fontSize: 11 }}
                   >
                     Cancel
                   </button>
@@ -213,6 +220,7 @@ export default function ViewTemplatesPage() {
               )}
             </div>
           ))}
+        </div>
         </div>
       </div>
     </NavShell>

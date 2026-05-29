@@ -4,6 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "../context/UserContext";
 import NavShell from "../components/NavShell";
+import {
+  bgPrimary, bgCard, bgDeep, bgHover, bgRowAlt,
+  textPrimary, textSecondary, textMuted, textLabel, textDim,
+  accentBlue, colorBorderInput, colorBorderRow,
+} from "../theme";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -59,7 +64,6 @@ export default function QueuePage() {
       });
       const data = await res.json();
       setBulkResult(data);
-      // refresh instances so statuses update
       const [inst] = await Promise.all([
         fetch(`${API}/data-instances/`).then((r) => r.json()),
       ]);
@@ -99,13 +103,13 @@ export default function QueuePage() {
 
   return (
     <NavShell active="Queue">
-      <div style={{ padding: "24px" }}>
+      <div style={{ background: bgPrimary, flex: 1, padding: "24px" }}>
 
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
           <div>
-            <div style={{ fontSize: 22, fontWeight: 500, color: "#1a1020", letterSpacing: -0.3 }}>Queue</div>
-            <div style={{ fontSize: 12, color: "#888", marginTop: 3 }}>Data instances ready for document generation</div>
+            <div style={{ fontSize: 22, fontWeight: 500, color: textPrimary, letterSpacing: -0.3 }}>Queue</div>
+            <div style={{ fontSize: 12, color: textMuted, marginTop: 3 }}>Data instances ready for document generation</div>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             {validatedCount > 0 && (
@@ -119,9 +123,9 @@ export default function QueuePage() {
             )}
             <button
               onClick={() => router.push("/data-instances/new")}
-              style={{ padding: "8px 16px", fontSize: 12, fontWeight: 600, background: "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+              style={{ padding: "10px 20px", fontSize: 13, fontWeight: 600, background: bgPrimary, color: "#fff", border: "none", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
             >
-              + New Entry
+              + New Manual Entry
             </button>
           </div>
         </div>
@@ -168,7 +172,7 @@ export default function QueuePage() {
               <button
                 key={f.key}
                 onClick={() => setFilterStatus(f.key)}
-                style={{ padding: "5px 12px", fontSize: 11, fontWeight: active ? 600 : 400, background: active ? "#1a1a2e" : "#fff", color: active ? "#fff" : "#666", border: "1px solid #c8c4be", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+                style={{ padding: "5px 12px", fontSize: 11, fontWeight: active ? 600 : 400, background: active ? textPrimary : "rgba(255,255,255,0.07)", color: active ? bgPrimary : textSecondary, border: `1px solid ${colorBorderInput}`, borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
               >
                 {f.label}
               </button>
@@ -177,7 +181,7 @@ export default function QueuePage() {
           <select
             value={filterSchema}
             onChange={(e) => setFilterSchema(e.target.value)}
-            style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 11, border: "1px solid #c8c4be", borderRadius: 2, background: "#fff", fontFamily: "inherit", cursor: "pointer" }}
+            style={{ marginLeft: "auto", padding: "5px 10px", fontSize: 11, border: `1px solid ${colorBorderInput}`, borderRadius: 2, background: bgCard, color: textSecondary, fontFamily: "inherit", cursor: "pointer" }}
           >
             <option value="">All schemas</option>
             {schemas.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -185,8 +189,8 @@ export default function QueuePage() {
         </div>
 
         {/* Table */}
-        <div style={{ border: "1px solid #c8c4be", background: "#fff", borderRadius: 2 }}>
-          <div style={{ display: "flex", background: "#1a1a2e", padding: "6px 12px" }}>
+        <div style={{ border: "1px solid rgba(255,255,255,0.08)", background: bgCard, borderRadius: 2 }}>
+          <div style={{ display: "flex", background: bgDeep, padding: "6px 12px" }}>
             {[
               { label: "Label", flex: 2 },
               { label: "Schema", flex: 1.2 },
@@ -201,17 +205,17 @@ export default function QueuePage() {
             ))}
           </div>
 
-          {loading && <div style={{ padding: "20px 12px", fontSize: 12, color: "#999" }}>Loading...</div>}
+          {loading && <div style={{ padding: "20px 12px", fontSize: 12, color: textMuted }}>Loading...</div>}
 
           {!loading && filtered.length === 0 && (
             <div style={{ padding: "32px 12px", textAlign: "center" }}>
-              <div style={{ fontSize: 13, color: "#888", marginBottom: 12 }}>
+              <div style={{ fontSize: 13, color: textMuted, marginBottom: 12 }}>
                 {instances.length === 0 ? "No entries yet." : "No entries match the current filter."}
               </div>
               {instances.length === 0 && (
                 <button
                   onClick={() => router.push("/data-instances/new")}
-                  style={{ padding: "8px 16px", fontSize: 12, background: "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+                  style={{ padding: "8px 16px", fontSize: 12, background: bgPrimary, color: "#fff", border: "none", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
                 >
                   Create your first entry →
                 </button>
@@ -223,19 +227,19 @@ export default function QueuePage() {
             <div
               key={instance.id}
               onClick={() => router.push(`/queue/${instance.id}`)}
-              style={{ display: "flex", alignItems: "center", padding: "10px 12px", borderBottom: "1px solid #eee", background: i % 2 === 1 ? "#fafafa" : "#fff", cursor: "pointer" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#f0eeeb")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = i % 2 === 1 ? "#fafafa" : "#fff")}
+              style={{ display: "flex", alignItems: "center", padding: "10px 12px", borderBottom: `1px solid ${colorBorderRow}`, background: i % 2 === 1 ? bgRowAlt : bgCard, cursor: "pointer" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = bgHover)}
+              onMouseLeave={(e) => (e.currentTarget.style.background = i % 2 === 1 ? bgRowAlt : bgCard)}
             >
               <div style={{ flex: 2, overflow: "hidden" }}>
-                <div style={{ fontSize: 12, fontWeight: 500, color: "#1a1020", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: 12, fontWeight: 500, color: textPrimary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {instance.label}
                 </div>
-                <div style={{ fontSize: 10, fontFamily: "monospace", color: "#bbb", marginTop: 1 }}>
+                <div style={{ fontSize: 10, fontFamily: "monospace", color: textDim, marginTop: 1 }}>
                   {instance.id.substring(0, 20)}…
                 </div>
               </div>
-              <span style={{ flex: 1.2, fontSize: 11, color: "#666", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <span style={{ flex: 1.2, fontSize: 11, color: textSecondary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {schemaMap[instance.schema_id] || "—"}
               </span>
               <span style={{ flex: 0.8 }}>
@@ -244,14 +248,14 @@ export default function QueuePage() {
               <span style={{ flex: 0.9 }}>
                 <StatusBadge status={instance.status} />
               </span>
-              <span style={{ flex: 0.9, fontSize: 11, color: "#999" }}>
+              <span style={{ flex: 0.9, fontSize: 11, color: textLabel }}>
                 {new Date(instance.created_at).toLocaleDateString()}
               </span>
               <span style={{ flex: 0.6, fontSize: 11, textAlign: "right" }}>
                 {instance.status === "validated" ? (
                   <span style={{ color: "#1565c0", fontWeight: 600 }}>Ready →</span>
                 ) : (
-                  <span style={{ color: "#aaa" }}>{instance.field_values?.length || 0} fields</span>
+                  <span style={{ color: textLabel }}>{instance.field_values?.length || 0} fields</span>
                 )}
               </span>
             </div>
@@ -260,7 +264,7 @@ export default function QueuePage() {
 
         {/* Status bar summary */}
         {!loading && instances.length > 0 && (
-          <div style={{ marginTop: 10, fontSize: 11, color: "#aaa" }}>
+          <div style={{ marginTop: 10, fontSize: 11, color: textLabel }}>
             Showing {filtered.length} of {instances.length} entries
           </div>
         )}
