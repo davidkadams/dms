@@ -4,6 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "../context/UserContext";
 import NavShell from "../components/NavShell";
+import {
+  bgPrimary, bgCard, bgDeep, bgRowAlt,
+  textPrimary, textBody, textSubtle, textSecondary, textMuted, textLabel, textDim,
+  accentTeal, accentBlue, accentGreen, accentRed,
+  borderCard, borderInput, colorBorderInput, colorBorderRow,
+  btnPrimary, btnDisabled, btnGhost, inputStyle, selectStyle,
+} from "../theme";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const STEPS = ["Upload", "Review & Confirm", "Extracted"];
@@ -20,15 +27,15 @@ function StepIndicator({ current }) {
               <div style={{
                 width: 24, height: 24, borderRadius: "50%", fontSize: 11, fontWeight: 600,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                background: done ? "#2e7d32" : active ? "#1a1a2e" : "#e0e0e0",
-                color: done || active ? "#fff" : "#999",
+                background: done ? accentGreen : active ? textPrimary : "rgba(255,255,255,0.12)",
+                color: done ? "#1a3a1a" : active ? bgPrimary : "rgba(255,255,255,0.4)",
               }}>
                 {done ? "✓" : i + 1}
               </div>
-              <span style={{ fontSize: 10, color: active ? "#1a1020" : "#aaa", fontWeight: active ? 600 : 400 }}>{label}</span>
+              <span style={{ fontSize: 10, color: active ? textPrimary : textLabel, fontWeight: active ? 600 : 400 }}>{label}</span>
             </div>
             {i < STEPS.length - 1 && (
-              <div style={{ width: 48, height: 1, background: i < current ? "#2e7d32" : "#e0e0e0", margin: "0 4px", marginBottom: 18 }} />
+              <div style={{ width: 48, height: 1, background: i < current ? accentGreen : "rgba(255,255,255,0.12)", margin: "0 4px", marginBottom: 18 }} />
             )}
           </div>
         );
@@ -55,7 +62,7 @@ export default function IngestPage() {
   const [schemaLocked, setSchemaLocked] = useState(false);
 
   const [extracting, setExtracting] = useState(false);
-  const [extractResult, setExtractResult] = useState(null);  // null = not yet extracted
+  const [extractResult, setExtractResult] = useState(null);
   const [loadingStage, setLoadingStage] = useState(0);
   const loadingIntervalRef = useRef(null);
 
@@ -73,7 +80,6 @@ export default function IngestPage() {
       .catch(() => {});
   }, [user]);
 
-  // render doc preview client-side when file changes
   useEffect(() => {
     if (!file) { setDocHtml(null); return; }
     if (!file.name.endsWith(".docx")) { setDocHtml(null); return; }
@@ -90,7 +96,6 @@ export default function IngestPage() {
     reader.readAsArrayBuffer(file);
   }, [file]);
 
-  // fetch schema fields when selected schema changes
   useEffect(() => {
     if (!selectedSchemaId) { setSelectedSchemaFields([]); return; }
     fetch(`${API}/schemas/${selectedSchemaId}/fields`)
@@ -99,7 +104,6 @@ export default function IngestPage() {
       .catch(() => setSelectedSchemaFields([]));
   }, [selectedSchemaId]);
 
-  // also load fields when schema pre-selected on step 0
   useEffect(() => {
     if (!preSelectedSchemaId) return;
     fetch(`${API}/schemas/${preSelectedSchemaId}/fields`)
@@ -156,7 +160,6 @@ export default function IngestPage() {
     setLoadingStage(0);
     setError("");
 
-    // cycle through loading stages every ~1.8s
     let stage = 0;
     loadingIntervalRef.current = setInterval(() => {
       stage = Math.min(stage + 1, LOADING_STAGES.length - 1);
@@ -189,34 +192,33 @@ export default function IngestPage() {
   };
 
   const fieldLabelMap = Object.fromEntries(selectedSchemaFields.map((f) => [f.name, f.label]));
-  const showRightPanel = step >= 0; // always show right panel
 
   return (
     <NavShell active="Ingest">
-      <div style={{ padding: "24px" }}>
+      <div style={{ background: bgPrimary, flex: 1, padding: "24px" }}>
 
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 22, fontWeight: 500, color: "#1a1020", letterSpacing: -0.3 }}>Ingest Document</div>
-          <div style={{ fontSize: 12, color: "#888", marginTop: 3 }}>Upload a document and we'll match it to a schema and extract the data.</div>
+          <div style={{ fontSize: 22, fontWeight: 500, color: textPrimary, letterSpacing: -0.3 }}>Ingest Document</div>
+          <div style={{ fontSize: 12, color: textMuted, marginTop: 3 }}>Upload a document and we'll match it to a schema and extract the data.</div>
         </div>
 
         <StepIndicator current={step} />
 
         <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, alignItems: "start" }}>
 
-          {/* ── LEFT: step controls (always visible) ── */}
+          {/* ── LEFT: step controls ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 
             {/* Step 0 — Upload */}
             {step === 0 && (
-              <div style={{ background: "#fff", border: "1px solid #c8c4be", borderRadius: 2, padding: "20px" }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 14 }}>Upload Document</div>
+              <div style={{ background: bgCard, border: borderCard, borderRadius: 2, padding: "20px" }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: textLabel, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 14 }}>Upload Document</div>
                 <div
                   onClick={() => fileRef.current?.click()}
                   style={{
-                    border: `2px dashed ${file ? "#1a1a2e" : "#c8c4be"}`, borderRadius: 2,
+                    border: `2px dashed ${file ? accentTeal : "rgba(255,255,255,0.2)"}`, borderRadius: 2,
                     padding: "28px 16px", textAlign: "center", cursor: "pointer",
-                    background: file ? "#f8f8ff" : "#fafafa", marginBottom: 14, transition: "all 0.15s",
+                    background: file ? "rgba(0,191,179,0.06)" : "rgba(255,255,255,0.03)", marginBottom: 14, transition: "all 0.15s",
                   }}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) setFile(f); }}
@@ -225,32 +227,32 @@ export default function IngestPage() {
                   {file ? (
                     <>
                       <div style={{ fontSize: 22, marginBottom: 6 }}>📄</div>
-                      <div style={{ fontSize: 12, fontWeight: 500, color: "#1a1020" }}>{file.name}</div>
-                      <div style={{ fontSize: 10, color: "#999", marginTop: 3 }}>{(file.size / 1024).toFixed(1)} KB</div>
-                      <div style={{ fontSize: 10, color: "#1565c0", marginTop: 6 }}>Click to change</div>
+                      <div style={{ fontSize: 12, fontWeight: 500, color: textPrimary }}>{file.name}</div>
+                      <div style={{ fontSize: 10, color: textMuted, marginTop: 3 }}>{(file.size / 1024).toFixed(1)} KB</div>
+                      <div style={{ fontSize: 10, color: accentTeal, marginTop: 6 }}>Click to change</div>
                     </>
                   ) : (
                     <>
                       <div style={{ fontSize: 22, marginBottom: 6 }}>↑</div>
-                      <div style={{ fontSize: 12, color: "#666" }}>Drop a file here or click to browse</div>
-                      <div style={{ fontSize: 10, color: "#aaa", marginTop: 3 }}>Supports .docx, .txt</div>
+                      <div style={{ fontSize: 12, color: textSecondary }}>Drop a file here or click to browse</div>
+                      <div style={{ fontSize: 10, color: textLabel, marginTop: 3 }}>Supports .docx, .txt</div>
                     </>
                   )}
                 </div>
 
-                <div style={{ marginBottom: 14, padding: "12px 14px", background: "#fafafa", border: "1px solid #e8e4e0", borderRadius: 2 }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "#555", marginBottom: 6 }}>
-                    Already know the schema? <span style={{ fontWeight: 400, color: "#aaa" }}>(optional)</span>
+                <div style={{ marginBottom: 14, padding: "12px 14px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 2 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: textSubtle, marginBottom: 6 }}>
+                    Already know the schema? <span style={{ fontWeight: 400, color: textLabel }}>(optional)</span>
                   </div>
                   <select
                     value={preSelectedSchemaId}
                     onChange={(e) => setPreSelectedSchemaId(e.target.value)}
-                    style={{ width: "100%", padding: "6px 10px", fontSize: 12, border: "1px solid #c8c4be", borderRadius: 2, background: "#fff", fontFamily: "inherit" }}
+                    style={{ ...selectStyle, width: "100%", padding: "6px 10px", fontSize: 12 }}
                   >
-                    <option value="">Let the LLM decide →</option>
+                    <option value="">Let the AI decide →</option>
                     {schemas.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
-                  <div style={{ fontSize: 10, color: "#aaa", marginTop: 5 }}>
+                  <div style={{ fontSize: 10, color: textLabel, marginTop: 5 }}>
                     {preSelectedSchemaId ? "Skips matching — extracts directly." : "Leave blank to auto-match."}
                   </div>
                 </div>
@@ -258,7 +260,7 @@ export default function IngestPage() {
                 {error && <div style={{ padding: "10px 12px", background: "#fdecea", border: "1px solid #ef9a9a", borderRadius: 2, fontSize: 11, color: "#c62828", marginBottom: 10 }}>{error}</div>}
 
                 <button onClick={handleUpload} disabled={!file || matching}
-                  style={{ width: "100%", padding: "9px", fontSize: 12, fontWeight: 600, background: !file || matching ? "#ccc" : "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: !file || matching ? "default" : "pointer", fontFamily: "inherit" }}>
+                  style={{ ...(!file || matching ? btnDisabled : btnPrimary), width: "100%", padding: "9px", fontSize: 12 }}>
                   {matching ? (preSelectedSchemaId ? "Reading document…" : "Analysing document…") : (preSelectedSchemaId ? "Continue →" : "Analyse Document →")}
                 </button>
               </div>
@@ -301,34 +303,34 @@ export default function IngestPage() {
                   </div>
                 )}
 
-                <div style={{ background: "#fff", border: "1px solid #c8c4be", borderRadius: 2, padding: "16px" }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 }}>Confirm Settings</div>
+                <div style={{ background: bgCard, border: borderCard, borderRadius: 2, padding: "16px" }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: textLabel, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 }}>Confirm Settings</div>
                   <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "#555", marginBottom: 4 }}>Entry label</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: textSubtle, marginBottom: 4 }}>Entry label</div>
                     <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. Acme Corp — Contract 2026"
-                      style={{ width: "100%", padding: "7px 10px", fontSize: 12, border: "1px solid #c8c4be", borderRadius: 2, fontFamily: "inherit" }} />
+                      style={{ ...inputStyle, width: "100%", padding: "7px 10px", fontSize: 12 }} />
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "#555", marginBottom: 4 }}>Schema</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: textSubtle, marginBottom: 4 }}>Schema</div>
                     {schemaLocked ? (
-                      <div style={{ padding: "7px 10px", fontSize: 12, border: "1px solid #c8c4be", borderRadius: 2, background: "#f5f5f5", color: "#555" }}>
+                      <div style={{ padding: "7px 10px", fontSize: 12, border: borderInput, borderRadius: 2, background: "rgba(255,255,255,0.05)", color: textBody }}>
                         {schemas.find((s) => s.id === selectedSchemaId)?.name || "Selected schema"}
-                        <span style={{ fontSize: 10, color: "#aaa", marginLeft: 6 }}>
+                        <span style={{ fontSize: 10, color: textLabel, marginLeft: 6 }}>
                           (<span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => { setSchemaLocked(false); setSelectedSchemaId(""); }}>change</span>)
                         </span>
                       </div>
                     ) : (
                       <>
                         <select value={selectedSchemaId} onChange={(e) => setSelectedSchemaId(e.target.value)}
-                          style={{ width: "100%", padding: "7px 10px", fontSize: 12, border: "1px solid #c8c4be", borderRadius: 2, background: "#fff", fontFamily: "inherit" }}>
+                          style={{ ...selectStyle, width: "100%", padding: "7px 10px", fontSize: 12 }}>
                           <option value="">Select a schema…</option>
                           {schemas.map((s) => (
                             <option key={s.id} value={s.id}>{s.name}{s.id === matchResult.matched_schema_id ? ` — ${matchResult.confidence}% match` : ""}</option>
                           ))}
                         </select>
-                        <div style={{ fontSize: 10, color: "#aaa", marginTop: 4 }}>
+                        <div style={{ fontSize: 10, color: textLabel, marginTop: 4 }}>
                           No schema?{" "}
-                          <span style={{ color: "#1565c0", cursor: "pointer", textDecoration: "underline" }} onClick={() => router.push("/schema-builder/new")}>Create one →</span>
+                          <span style={{ color: accentBlue, cursor: "pointer", textDecoration: "underline" }} onClick={() => router.push("/schema-builder/new")}>Create one →</span>
                         </div>
                       </>
                     )}
@@ -340,11 +342,11 @@ export default function IngestPage() {
                 <div style={{ display: "flex", gap: 8 }}>
                   <button onClick={() => { setStep(0); setMatchResult(null); setFile(null); setError(""); setSchemaLocked(false); }}
                     disabled={extracting}
-                    style={{ padding: "8px 14px", fontSize: 12, background: "#f0eeeb", border: "1px solid #c8c4be", borderRadius: 2, cursor: extracting ? "default" : "pointer", fontFamily: "inherit", opacity: extracting ? 0.4 : 1 }}>
+                    style={{ ...btnGhost, padding: "8px 14px", fontSize: 12, opacity: extracting ? 0.4 : 1 }}>
                     ← Back
                   </button>
                   <button onClick={handleExtract} disabled={!selectedSchemaId || !label.trim() || extracting}
-                    style={{ flex: 1, padding: "8px", fontSize: 12, fontWeight: 600, background: !selectedSchemaId || !label.trim() || extracting ? "#ccc" : "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: !selectedSchemaId || !label.trim() || extracting ? "default" : "pointer", fontFamily: "inherit" }}>
+                    style={{ ...(!selectedSchemaId || !label.trim() || extracting ? btnDisabled : btnPrimary), flex: 1, padding: "8px", fontSize: 12 }}>
                     {extracting ? LOADING_STAGES[loadingStage] : "Extract & Add to Queue →"}
                   </button>
                 </div>
@@ -352,10 +354,10 @@ export default function IngestPage() {
                 {/* Loading bar */}
                 {extracting && (
                   <div style={{ marginTop: 4 }}>
-                    <div style={{ height: 3, background: "#e0e0e0", borderRadius: 2, overflow: "hidden" }}>
+                    <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
                       <div style={{
                         height: "100%",
-                        background: "linear-gradient(90deg, #1a1a2e, #00bfb3, #1a1a2e)",
+                        background: `linear-gradient(90deg, ${bgPrimary}, ${accentTeal}, ${bgPrimary})`,
                         backgroundSize: "200% 100%",
                         borderRadius: 2,
                         animation: "shimmer 1.4s infinite linear",
@@ -364,7 +366,7 @@ export default function IngestPage() {
                       }} />
                     </div>
                     <style>{`@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
-                    <div style={{ fontSize: 10, color: "#aaa", marginTop: 4, textAlign: "center" }}>
+                    <div style={{ fontSize: 10, color: textLabel, marginTop: 4, textAlign: "center" }}>
                       Analysing your document…
                     </div>
                   </div>
@@ -372,25 +374,25 @@ export default function IngestPage() {
               </>
             )}
 
-            {/* Step 2 — Success, stay on same page */}
+            {/* Step 2 — Success */}
             {step === 2 && extractResult && (
-              <div style={{ background: "#fff", border: "1px solid #c8c4be", borderRadius: 2, padding: "20px" }}>
+              <div style={{ background: bgCard, border: borderCard, borderRadius: 2, padding: "20px" }}>
                 <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 16 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#e8f5e9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>✓</div>
+                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(129,199,132,0.15)", border: `1px solid ${accentGreen}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0, color: accentGreen }}>✓</div>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#2e7d32" }}>Extraction complete</div>
-                    <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: accentGreen }}>Extraction complete</div>
+                    <div style={{ fontSize: 11, color: textMuted, marginTop: 2 }}>
                       {extractResult.fields_found} of {extractResult.fields_total} fields found — entry added to queue for review.
                     </div>
                   </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   <button onClick={() => router.push(`/queue/${extractResult.data_instance_id}`)}
-                    style={{ width: "100%", padding: "9px", fontSize: 12, fontWeight: 600, background: "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}>
+                    style={{ ...btnPrimary, width: "100%", padding: "9px", fontSize: 12 }}>
                     Review & Validate in Queue →
                   </button>
                   <button onClick={resetAll}
-                    style={{ width: "100%", padding: "8px", fontSize: 12, background: "#f0eeeb", border: "1px solid #c8c4be", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}>
+                    style={{ ...btnGhost, width: "100%", padding: "8px", fontSize: 12 }}>
                     Ingest Another Document
                   </button>
                 </div>
@@ -398,54 +400,53 @@ export default function IngestPage() {
             )}
           </div>
 
-          {/* ── RIGHT: doc preview + fields/extraction panel (always visible) ── */}
+          {/* ── RIGHT: doc preview + fields/extraction panel ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 
-            {/* Document preview — always shown */}
-            <div style={{ background: "#fff", border: "1px solid #c8c4be", borderRadius: 2, overflow: "hidden" }}>
-              <div style={{ background: "#1a1a2e", padding: "6px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            {/* Document preview */}
+            <div style={{ background: bgCard, border: borderCard, borderRadius: 2, overflow: "hidden" }}>
+              <div style={{ background: bgDeep, padding: "6px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontSize: 11, fontWeight: 600, color: "#a0a0c0" }}>Document Preview</span>
-                {file && <span style={{ fontSize: 10, color: "#666" }}>{file.name}</span>}
+                {file && <span style={{ fontSize: 10, color: textMuted }}>{file.name}</span>}
               </div>
               <div style={{ padding: "16px", maxHeight: 380, overflowY: "auto" }}>
-                {!file && <div style={{ fontSize: 12, color: "#bbb", textAlign: "center", padding: "32px 0" }}>No document uploaded yet.</div>}
-                {file && docPreviewLoading && <div style={{ fontSize: 12, color: "#999", textAlign: "center", padding: "32px 0" }}>Loading preview…</div>}
-                {file && !docPreviewLoading && !docHtml && <div style={{ fontSize: 12, color: "#bbb", textAlign: "center", padding: "32px 0" }}>Preview unavailable.</div>}
-                {docHtml && <div style={{ fontSize: 11, lineHeight: 1.7, color: "#1a1020" }} dangerouslySetInnerHTML={{ __html: docHtml }} />}
+                {!file && <div style={{ fontSize: 12, color: textDim, textAlign: "center", padding: "32px 0" }}>No document uploaded yet.</div>}
+                {file && docPreviewLoading && <div style={{ fontSize: 12, color: textMuted, textAlign: "center", padding: "32px 0" }}>Loading preview…</div>}
+                {file && !docPreviewLoading && !docHtml && <div style={{ fontSize: 12, color: textDim, textAlign: "center", padding: "32px 0" }}>Preview unavailable.</div>}
+                {docHtml && <div style={{ fontSize: 11, lineHeight: 1.7, color: textBody }} dangerouslySetInnerHTML={{ __html: docHtml }} />}
               </div>
             </div>
 
-            {/* Bottom-right panel: swaps between schema fields and extracted values */}
-            <div style={{ background: "#fff", border: "1px solid #c8c4be", borderRadius: 2, overflow: "hidden" }}>
+            {/* Bottom-right panel */}
+            <div style={{ background: bgCard, border: borderCard, borderRadius: 2, overflow: "hidden" }}>
 
               {/* ── Extracted values (step 2) ── */}
               {step === 2 && extractResult ? (
                 <>
-                  <div style={{ background: "#1a1a2e", padding: "6px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ background: bgDeep, padding: "6px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ fontSize: 11, fontWeight: 600, color: "#a0a0c0" }}>Extracted Values</span>
                     <span style={{ fontSize: 10, fontWeight: 600, color: "#4caf50" }}>
                       {extractResult.fields_found} / {extractResult.fields_total} found
                     </span>
                   </div>
                   <div style={{ maxHeight: 320, overflowY: "auto" }}>
-                    {/* column headers */}
-                    <div style={{ display: "flex", gap: 8, padding: "5px 14px", background: "#fafafa", borderBottom: "1px solid #eee" }}>
-                      <span style={{ flex: 1.2, fontSize: 10, fontWeight: 600, color: "#bbb", textTransform: "uppercase" }}>Field</span>
-                      <span style={{ flex: 2, fontSize: 10, fontWeight: 600, color: "#bbb", textTransform: "uppercase" }}>Extracted Value</span>
+                    <div style={{ display: "flex", gap: 8, padding: "5px 14px", background: bgDeep, borderBottom: `1px solid ${colorBorderRow}` }}>
+                      <span style={{ flex: 1.2, fontSize: 10, fontWeight: 600, color: textLabel, textTransform: "uppercase" }}>Field</span>
+                      <span style={{ flex: 2, fontSize: 10, fontWeight: 600, color: textLabel, textTransform: "uppercase" }}>Extracted Value</span>
                       <span style={{ width: 24 }} />
                     </div>
                     {Object.entries(extractResult.extracted_values || {}).map(([name, value], i) => {
                       const found = value !== null && value !== undefined && value !== "";
                       return (
-                        <div key={name} style={{ display: "flex", gap: 8, padding: "8px 14px", alignItems: "center", borderBottom: "1px solid #f5f5f5", background: i % 2 === 1 ? "#fafafa" : "#fff" }}>
+                        <div key={name} style={{ display: "flex", gap: 8, padding: "8px 14px", alignItems: "center", borderBottom: `1px solid ${colorBorderRow}`, background: i % 2 === 1 ? bgRowAlt : bgCard }}>
                           <div style={{ flex: 1.2 }}>
-                            <div style={{ fontSize: 11, fontWeight: 500, color: "#444" }}>{fieldLabelMap[name] || name}</div>
-                            <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ccc", marginTop: 1 }}>{name}</div>
+                            <div style={{ fontSize: 11, fontWeight: 500, color: textBody }}>{fieldLabelMap[name] || name}</div>
+                            <div style={{ fontSize: 9, fontFamily: "monospace", color: "rgba(255,255,255,0.25)", marginTop: 1 }}>{name}</div>
                           </div>
                           <div style={{ flex: 2 }}>
                             {found
-                              ? <span style={{ fontSize: 12, color: "#1a1020", fontWeight: 500 }}>{String(value)}</span>
-                              : <span style={{ fontSize: 11, color: "#ccc", fontStyle: "italic" }}>not found</span>
+                              ? <span style={{ fontSize: 12, color: textPrimary, fontWeight: 500 }}>{String(value)}</span>
+                              : <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", fontStyle: "italic" }}>not found</span>
                             }
                           </div>
                           <div style={{ width: 24, textAlign: "right" }}>
@@ -461,46 +462,46 @@ export default function IngestPage() {
               ) : (
                 /* ── Schema fields preview (steps 0 & 1) ── */
                 <>
-                  <div style={{ background: "#1a1a2e", padding: "6px 14px" }}>
+                  <div style={{ background: bgDeep, padding: "6px 14px" }}>
                     <span style={{ fontSize: 11, fontWeight: 600, color: "#a0a0c0" }}>
                       Fields to Extract
-                      {selectedSchemaFields.length > 0 && <span style={{ color: "#666", fontWeight: 400 }}> — {selectedSchemaFields.length} fields</span>}
+                      {selectedSchemaFields.length > 0 && <span style={{ color: textLabel, fontWeight: 400 }}> — {selectedSchemaFields.length} fields</span>}
                     </span>
                   </div>
 
                   {!selectedSchemaId && (
-                    <div style={{ padding: "20px 14px", fontSize: 12, color: "#bbb", textAlign: "center" }}>
+                    <div style={{ padding: "20px 14px", fontSize: 12, color: textDim, textAlign: "center" }}>
                       Select a schema to preview which fields will be extracted.
                     </div>
                   )}
 
                   {selectedSchemaFields.length > 0 && (
                     <>
-                      <div style={{ padding: "8px 14px", background: "#e3f2fd", borderBottom: "1px solid #bbdefb" }}>
-                        <span style={{ fontSize: 10, color: "#1565c0" }}>
+                      <div style={{ padding: "8px 14px", background: "rgba(144,202,249,0.08)", borderBottom: "1px solid rgba(144,202,249,0.15)" }}>
+                        <span style={{ fontSize: 10, color: accentBlue }}>
                           Adding a <strong>description</strong> or <strong>extraction hint</strong> to each field improves accuracy on niche documents.
                         </span>
                       </div>
                       <div style={{ maxHeight: 280, overflowY: "auto" }}>
-                        <div style={{ display: "flex", gap: 8, padding: "5px 14px", background: "#fafafa", borderBottom: "1px solid #eee" }}>
-                          <span style={{ flex: 1.2, fontSize: 10, fontWeight: 600, color: "#bbb", textTransform: "uppercase" }}>Field</span>
-                          <span style={{ flex: 0.7, fontSize: 10, fontWeight: 600, color: "#bbb", textTransform: "uppercase" }}>Type</span>
-                          <span style={{ flex: 2, fontSize: 10, fontWeight: 600, color: "#bbb", textTransform: "uppercase" }}>Description / Hint</span>
+                        <div style={{ display: "flex", gap: 8, padding: "5px 14px", background: bgDeep, borderBottom: `1px solid ${colorBorderRow}` }}>
+                          <span style={{ flex: 1.2, fontSize: 10, fontWeight: 600, color: textLabel, textTransform: "uppercase" }}>Field</span>
+                          <span style={{ flex: 0.7, fontSize: 10, fontWeight: 600, color: textLabel, textTransform: "uppercase" }}>Type</span>
+                          <span style={{ flex: 2, fontSize: 10, fontWeight: 600, color: textLabel, textTransform: "uppercase" }}>Description / Hint</span>
                         </div>
                         {selectedSchemaFields.map((f, i) => (
-                          <div key={f.id} style={{ display: "flex", gap: 8, padding: "8px 14px", borderBottom: "1px solid #f5f5f5", background: i % 2 === 1 ? "#fafafa" : "#fff" }}>
+                          <div key={f.id} style={{ display: "flex", gap: 8, padding: "8px 14px", borderBottom: `1px solid ${colorBorderRow}`, background: i % 2 === 1 ? bgRowAlt : bgCard }}>
                             <div style={{ flex: 1.2 }}>
-                              <div style={{ fontSize: 11, fontWeight: 500, color: "#1a1020" }}>{f.label}</div>
-                              <div style={{ fontSize: 9, fontFamily: "monospace", color: "#bbb", marginTop: 1 }}>{f.name}</div>
+                              <div style={{ fontSize: 11, fontWeight: 500, color: textPrimary }}>{f.label}</div>
+                              <div style={{ fontSize: 9, fontFamily: "monospace", color: "rgba(255,255,255,0.25)", marginTop: 1 }}>{f.name}</div>
                             </div>
                             <div style={{ flex: 0.7 }}>
-                              <span style={{ fontSize: 10, color: "#888", background: "#f0eeeb", padding: "1px 5px", borderRadius: 2 }}>{f.field_type}</span>
-                              {f.required && <span style={{ fontSize: 9, color: "#c62828", marginLeft: 4 }}>*</span>}
+                              <span style={{ fontSize: 10, color: textSecondary, background: "rgba(255,255,255,0.07)", padding: "1px 5px", borderRadius: 2 }}>{f.field_type}</span>
+                              {f.required && <span style={{ fontSize: 9, color: accentRed, marginLeft: 4 }}>*</span>}
                             </div>
                             <div style={{ flex: 2 }}>
-                              {f.description && <div style={{ fontSize: 10, color: "#555", lineHeight: 1.4 }}>{f.description}</div>}
-                              {f.extraction_hint && <div style={{ fontSize: 10, color: "#1565c0", marginTop: f.description ? 3 : 0, lineHeight: 1.4 }}>Hint: {f.extraction_hint}</div>}
-                              {!f.description && !f.extraction_hint && <span style={{ fontSize: 10, color: "#ddd" }}>—</span>}
+                              {f.description && <div style={{ fontSize: 10, color: textSecondary, lineHeight: 1.4 }}>{f.description}</div>}
+                              {f.extraction_hint && <div style={{ fontSize: 10, color: accentBlue, marginTop: f.description ? 3 : 0, lineHeight: 1.4 }}>Hint: {f.extraction_hint}</div>}
+                              {!f.description && !f.extraction_hint && <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)" }}>—</span>}
                             </div>
                           </div>
                         ))}

@@ -4,6 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "../../context/UserContext";
 import NavShell from "../../components/NavShell";
+import {
+  bgPrimary, bgCard, bgDeep, bgHover,
+  textPrimary, textBody, textSubtle, textSecondary, textMuted, textLabel, textDim,
+  accentBlue, accentGreen, accentRed,
+  borderCard, borderInput, colorBorderInput, colorBorderRow,
+  btnPrimary, btnDisabled, btnGhost, inputStyle, selectStyle,
+} from "../../theme";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const FIELD_TYPES = ["string", "number", "date"];
@@ -63,50 +70,50 @@ function FieldRow({ field, schemaId, onSaved, onDeleted }) {
 
   if (editing) {
     return (
-      <div style={{ padding: "10px 14px", background: "#f8f8ff", borderBottom: "1px solid #e8e4ff" }}>
+      <div style={{ padding: "10px 14px", background: "#2a2a4e", borderBottom: borderCard }}>
         <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 10, color: "#aaa", marginBottom: 3 }}>Label</div>
+            <div style={{ fontSize: 10, color: textLabel, marginBottom: 3 }}>Label</div>
             <input value={label} onChange={(e) => setLabel(e.target.value)}
-              style={{ width: "100%", padding: "5px 8px", fontSize: 11, border: "1px solid #c8c4be", borderRadius: 2, fontFamily: "inherit" }} />
+              style={{ ...inputStyle, width: "100%", padding: "5px 8px", fontSize: 11 }} />
           </div>
           <div style={{ flex: 0.6 }}>
-            <div style={{ fontSize: 10, color: "#aaa", marginBottom: 3 }}>Type</div>
+            <div style={{ fontSize: 10, color: textLabel, marginBottom: 3 }}>Type</div>
             <select value={fieldType} onChange={(e) => setFieldType(e.target.value)}
-              style={{ width: "100%", padding: "5px 8px", fontSize: 11, border: "1px solid #c8c4be", borderRadius: 2, fontFamily: "inherit", background: "#fff" }}>
+              style={{ ...selectStyle, width: "100%", padding: "5px 8px", fontSize: 11 }}>
               {FIELD_TYPES.map((t) => <option key={t}>{t}</option>)}
             </select>
           </div>
           <div style={{ display: "flex", alignItems: "flex-end", paddingBottom: 2 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#555", whiteSpace: "nowrap" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: textSubtle, whiteSpace: "nowrap" }}>
               <input type="checkbox" checked={required} onChange={(e) => setRequired(e.target.checked)} />
               required
             </label>
           </div>
         </div>
         <div style={{ marginBottom: 8 }}>
-          <div style={{ fontSize: 10, color: "#aaa", marginBottom: 3 }}>
-            Description <span style={{ color: "#bbb" }}>(helps LLM extraction)</span>
+          <div style={{ fontSize: 10, color: textLabel, marginBottom: 3 }}>
+            Description <span style={{ color: "rgba(255,255,255,0.2)" }}>(helps AI extraction)</span>
           </div>
           <input value={description} onChange={(e) => setDescription(e.target.value)}
             placeholder="What does this field mean in context?"
-            style={{ width: "100%", padding: "5px 8px", fontSize: 11, border: "1px solid #c8c4be", borderRadius: 2, fontFamily: "inherit" }} />
+            style={{ ...inputStyle, width: "100%", padding: "5px 8px", fontSize: 11 }} />
         </div>
         <div style={{ marginBottom: 10 }}>
-          <div style={{ fontSize: 10, color: "#aaa", marginBottom: 3 }}>
-            Extraction hint <span style={{ color: "#bbb" }}>(where to look in the document)</span>
+          <div style={{ fontSize: 10, color: textLabel, marginBottom: 3 }}>
+            Extraction hint <span style={{ color: "rgba(255,255,255,0.2)" }}>(where to look in the document)</span>
           </div>
           <input value={hint} onChange={(e) => setHint(e.target.value)}
             placeholder="e.g. Usually in the Fees section or Schedule 2"
-            style={{ width: "100%", padding: "5px 8px", fontSize: 11, border: "1px solid #c8c4be", borderRadius: 2, fontFamily: "inherit" }} />
+            style={{ ...inputStyle, width: "100%", padding: "5px 8px", fontSize: 11 }} />
         </div>
         <div style={{ display: "flex", gap: 6 }}>
           <button onClick={handleSave} disabled={saving}
-            style={{ padding: "4px 12px", fontSize: 11, fontWeight: 600, background: saving ? "#ccc" : "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: saving ? "default" : "pointer", fontFamily: "inherit" }}>
+            style={{ ...(saving ? btnDisabled : btnPrimary), padding: "4px 12px", fontSize: 11 }}>
             {saving ? "Saving…" : "Save"}
           </button>
           <button onClick={() => setEditing(false)}
-            style={{ padding: "4px 10px", fontSize: 11, background: "#fff", border: "1px solid #c8c4be", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}>
+            style={{ ...btnGhost, padding: "4px 10px", fontSize: 11 }}>
             Cancel
           </button>
         </div>
@@ -115,42 +122,42 @@ function FieldRow({ field, schemaId, onSaved, onDeleted }) {
   }
 
   return (
-    <div style={{ display: "flex", gap: 8, padding: "7px 14px", borderBottom: "1px solid #f5f5f5", alignItems: "flex-start" }}
-      onMouseEnter={(e) => e.currentTarget.style.background = "#fafafa"}
+    <div style={{ display: "flex", gap: 8, padding: "7px 14px", borderBottom: `1px solid ${colorBorderRow}`, alignItems: "flex-start" }}
+      onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}
       onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
       <div style={{ flex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 11, fontWeight: 500, color: "#1a1020" }}>{field.label}</span>
-          <span style={{ fontSize: 9, fontFamily: "monospace", color: "#bbb" }}>{field.name}</span>
+          <span style={{ fontSize: 11, fontWeight: 500, color: textPrimary }}>{field.label}</span>
+          <span style={{ fontSize: 9, fontFamily: "monospace", color: textDim }}>{field.name}</span>
         </div>
         {(field.description || field.extraction_hint) && (
           <div style={{ marginTop: 2 }}>
-            {field.description && <div style={{ fontSize: 10, color: "#777" }}>{field.description}</div>}
-            {field.extraction_hint && <div style={{ fontSize: 10, color: "#1565c0" }}>Hint: {field.extraction_hint}</div>}
+            {field.description && <div style={{ fontSize: 10, color: textSecondary }}>{field.description}</div>}
+            {field.extraction_hint && <div style={{ fontSize: 10, color: accentBlue }}>Hint: {field.extraction_hint}</div>}
           </div>
         )}
       </div>
-      <span style={{ fontSize: 10, color: "#888", background: "#f0eeeb", padding: "1px 5px", borderRadius: 2, whiteSpace: "nowrap", marginTop: 1 }}>{field.field_type}</span>
-      <span style={{ fontSize: 10, color: field.required ? "#2e7d32" : "#bbb", whiteSpace: "nowrap", marginTop: 1 }}>{field.required ? "req" : "opt"}</span>
+      <span style={{ fontSize: 10, color: textSecondary, background: "rgba(255,255,255,0.07)", padding: "1px 5px", borderRadius: 2, whiteSpace: "nowrap", marginTop: 1 }}>{field.field_type}</span>
+      <span style={{ fontSize: 10, color: field.required ? accentGreen : textDim, whiteSpace: "nowrap", marginTop: 1 }}>{field.required ? "req" : "opt"}</span>
       <div style={{ display: "flex", gap: 4, marginTop: 0, flexShrink: 0 }}>
         <button onClick={() => setEditing(true)}
-          style={{ padding: "2px 8px", fontSize: 10, background: "none", border: "1px solid #c8c4be", borderRadius: 2, cursor: "pointer", color: "#555", fontFamily: "inherit" }}>
+          style={{ padding: "2px 8px", fontSize: 10, background: "none", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 2, cursor: "pointer", color: textSubtle, fontFamily: "inherit" }}>
           Edit
         </button>
         {confirmDelete ? (
           <>
             <button onClick={handleDelete} disabled={deleting}
-              style={{ padding: "2px 8px", fontSize: 10, background: "#fdecea", border: "1px solid #ef9a9a", borderRadius: 2, cursor: "pointer", color: "#c62828", fontFamily: "inherit" }}>
+              style={{ padding: "2px 8px", fontSize: 10, background: "rgba(239,154,154,0.12)", border: "1px solid rgba(239,154,154,0.3)", borderRadius: 2, cursor: "pointer", color: accentRed, fontFamily: "inherit" }}>
               {deleting ? "…" : "Confirm"}
             </button>
             <button onClick={() => setConfirmDelete(false)}
-              style={{ padding: "2px 6px", fontSize: 10, background: "none", border: "1px solid #c8c4be", borderRadius: 2, cursor: "pointer", color: "#888", fontFamily: "inherit" }}>
+              style={{ padding: "2px 6px", fontSize: 10, background: "none", border: borderInput, borderRadius: 2, cursor: "pointer", color: "rgba(255,255,255,0.5)", fontFamily: "inherit" }}>
               ✕
             </button>
           </>
         ) : (
           <button onClick={() => setConfirmDelete(true)}
-            style={{ padding: "2px 8px", fontSize: 10, background: "none", border: "1px solid #e0e0e0", borderRadius: 2, cursor: "pointer", color: "#bbb", fontFamily: "inherit" }}>
+            style={{ padding: "2px 8px", fontSize: 10, background: "none", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 2, cursor: "pointer", color: textDim, fontFamily: "inherit" }}>
             Delete
           </button>
         )}
@@ -206,7 +213,7 @@ function AddFieldForm({ schemaId, fieldCount, onAdded }) {
     return (
       <div style={{ padding: "8px 14px" }}>
         <button onClick={() => setOpen(true)}
-          style={{ padding: "4px 12px", fontSize: 11, background: "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}>
+          style={{ ...btnPrimary, padding: "4px 12px", fontSize: 11 }}>
           + Add Field
         </button>
       </div>
@@ -214,28 +221,28 @@ function AddFieldForm({ schemaId, fieldCount, onAdded }) {
   }
 
   return (
-    <div style={{ padding: "12px 14px", background: "#f8fff8", borderTop: "1px solid #e0f0e0" }}>
-      <div style={{ fontSize: 11, fontWeight: 600, color: "#555", marginBottom: 10 }}>New Field</div>
+    <div style={{ padding: "12px 14px", background: "rgba(255,255,255,0.03)", borderTop: borderCard }}>
+      <div style={{ fontSize: 11, fontWeight: 600, color: textSubtle, marginBottom: 10 }}>New Field</div>
       <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 10, color: "#aaa", marginBottom: 3 }}>name <span style={{ color: "#bbb" }}>(snake_case, used for matching)</span></div>
+          <div style={{ fontSize: 10, color: textLabel, marginBottom: 3 }}>name <span style={{ color: "rgba(255,255,255,0.2)" }}>(snake_case, used for matching)</span></div>
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. unit_price"
-            style={{ width: "100%", padding: "5px 8px", fontSize: 11, border: "1px solid #c8c4be", borderRadius: 2, fontFamily: "monospace" }} />
+            style={{ ...inputStyle, width: "100%", padding: "5px 8px", fontSize: 11, fontFamily: "monospace" }} />
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 10, color: "#aaa", marginBottom: 3 }}>label <span style={{ color: "#bbb" }}>(display name)</span></div>
+          <div style={{ fontSize: 10, color: textLabel, marginBottom: 3 }}>label <span style={{ color: "rgba(255,255,255,0.2)" }}>(display name)</span></div>
           <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. Unit Price"
-            style={{ width: "100%", padding: "5px 8px", fontSize: 11, border: "1px solid #c8c4be", borderRadius: 2, fontFamily: "inherit" }} />
+            style={{ ...inputStyle, width: "100%", padding: "5px 8px", fontSize: 11 }} />
         </div>
         <div style={{ flex: 0.6 }}>
-          <div style={{ fontSize: 10, color: "#aaa", marginBottom: 3 }}>type</div>
+          <div style={{ fontSize: 10, color: textLabel, marginBottom: 3 }}>type</div>
           <select value={fieldType} onChange={(e) => setFieldType(e.target.value)}
-            style={{ width: "100%", padding: "5px 8px", fontSize: 11, border: "1px solid #c8c4be", borderRadius: 2, fontFamily: "inherit", background: "#fff" }}>
+            style={{ ...selectStyle, width: "100%", padding: "5px 8px", fontSize: 11 }}>
             {FIELD_TYPES.map((t) => <option key={t}>{t}</option>)}
           </select>
         </div>
         <div style={{ display: "flex", alignItems: "flex-end", paddingBottom: 2 }}>
-          <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#555", whiteSpace: "nowrap" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: textSubtle, whiteSpace: "nowrap" }}>
             <input type="checkbox" checked={required} onChange={(e) => setRequired(e.target.checked)} />
             required
           </label>
@@ -243,32 +250,32 @@ function AddFieldForm({ schemaId, fieldCount, onAdded }) {
       </div>
 
       <div style={{ marginBottom: 8 }}>
-        <div style={{ fontSize: 10, color: "#aaa", marginBottom: 3 }}>
-          Description <span style={{ color: "#1565c0" }}>— improves LLM extraction accuracy</span>
+        <div style={{ fontSize: 10, color: textLabel, marginBottom: 3 }}>
+          Description <span style={{ color: accentBlue }}>— improves AI extraction accuracy</span>
         </div>
         <input value={description} onChange={(e) => setDescription(e.target.value)}
           placeholder="What does this field represent? e.g. The annual management fee as a percentage"
-          style={{ width: "100%", padding: "5px 8px", fontSize: 11, border: "1px solid #c8c4be", borderRadius: 2, fontFamily: "inherit" }} />
+          style={{ ...inputStyle, width: "100%", padding: "5px 8px", fontSize: 11 }} />
       </div>
 
       <div style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 10, color: "#aaa", marginBottom: 3 }}>
-          Extraction hint <span style={{ color: "#1565c0" }}>— where to look in the document</span>
+        <div style={{ fontSize: 10, color: textLabel, marginBottom: 3 }}>
+          Extraction hint <span style={{ color: accentBlue }}>— where to look in the document</span>
         </div>
         <input value={hint} onChange={(e) => setHint(e.target.value)}
           placeholder="e.g. Usually found in the Fees section or Schedule 2, stated as a percentage"
-          style={{ width: "100%", padding: "5px 8px", fontSize: 11, border: "1px solid #c8c4be", borderRadius: 2, fontFamily: "inherit" }} />
+          style={{ ...inputStyle, width: "100%", padding: "5px 8px", fontSize: 11 }} />
       </div>
 
-      {error && <div style={{ fontSize: 11, color: "#c62828", marginBottom: 8 }}>{error}</div>}
+      {error && <div style={{ fontSize: 11, color: accentRed, marginBottom: 8 }}>{error}</div>}
 
       <div style={{ display: "flex", gap: 6 }}>
         <button onClick={handleAdd} disabled={saving}
-          style={{ padding: "5px 14px", fontSize: 11, fontWeight: 600, background: saving ? "#ccc" : "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: saving ? "default" : "pointer", fontFamily: "inherit" }}>
+          style={{ ...(saving ? btnDisabled : btnPrimary), padding: "5px 14px", fontSize: 11 }}>
           {saving ? "Adding…" : "Add Field"}
         </button>
         <button onClick={() => { reset(); setOpen(false); }}
-          style={{ padding: "5px 10px", fontSize: 11, background: "#fff", border: "1px solid #c8c4be", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}>
+          style={{ ...btnGhost, padding: "5px 10px", fontSize: 11 }}>
           Cancel
         </button>
       </div>
@@ -283,7 +290,6 @@ export default function ViewSchemasPage() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
-  // per-schema local fields state so edits don't require full reload
   const [schemaFields, setSchemaFields] = useState({});
 
   useEffect(() => {
@@ -295,7 +301,6 @@ export default function ViewSchemasPage() {
       const userSchemas = s.filter((sc) => sc.created_by === user.id);
       setSchemas(userSchemas);
       setTemplates(t.filter((tp) => tp.created_by === user.id));
-      // seed schemaFields from the fields already embedded in the response
       const fieldsMap = {};
       userSchemas.forEach((sc) => { if (sc.fields) fieldsMap[sc.id] = sc.fields; });
       setSchemaFields(fieldsMap);
@@ -303,7 +308,6 @@ export default function ViewSchemasPage() {
     }).catch(() => setLoading(false));
   }, [user, router]);
 
-  // when expanding a schema, fetch fresh fields
   const handleExpand = async (schemaId) => {
     if (expanded === schemaId) { setExpanded(null); return; }
     setExpanded(schemaId);
@@ -340,29 +344,35 @@ export default function ViewSchemasPage() {
 
   return (
     <NavShell active="Schema Builder">
-      <div style={{ padding: "24px", maxWidth: 760 }}>
-        <div style={{ fontSize: 11, color: "#999", marginBottom: 16, cursor: "pointer" }} onClick={() => router.push("/schema-builder")}>
+      <div style={{ background: bgPrimary, flex: 1, padding: "24px" }}>
+        <div style={{ maxWidth: 760 }}>
+        <div
+          style={{ fontSize: 11, color: textLabel, marginBottom: 16, cursor: "pointer" }}
+          onClick={() => router.push("/schema-builder")}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = textLabel)}
+        >
           ← Schema Builder
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
           <div>
-            <div style={{ fontSize: 20, fontWeight: 500, color: "#1a1020" }}>Your Schemas</div>
-            <div style={{ fontSize: 12, color: "#888", marginTop: 3 }}>{schemas.length} schema{schemas.length !== 1 ? "s" : ""}</div>
+            <div style={{ fontSize: 20, fontWeight: 500, color: textPrimary }}>Your Schemas</div>
+            <div style={{ fontSize: 12, color: textMuted, marginTop: 3 }}>{schemas.length} schema{schemas.length !== 1 ? "s" : ""}</div>
           </div>
           <button onClick={() => router.push("/schema-builder/new")}
-            style={{ padding: "7px 14px", fontSize: 12, fontWeight: 600, background: "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}>
+            style={{ ...btnPrimary, padding: "7px 14px", fontSize: 12 }}>
             + New Schema
           </button>
         </div>
 
-        {loading && <div style={{ fontSize: 12, color: "#999" }}>Loading...</div>}
+        {loading && <div style={{ fontSize: 12, color: textMuted }}>Loading...</div>}
 
         {!loading && schemas.length === 0 && (
-          <div style={{ background: "#fff", border: "1px solid #c8c4be", borderRadius: 2, padding: "24px", textAlign: "center" }}>
-            <div style={{ fontSize: 13, color: "#888", marginBottom: 12 }}>No schemas yet.</div>
+          <div style={{ background: bgCard, border: borderCard, borderRadius: 2, padding: "24px", textAlign: "center" }}>
+            <div style={{ fontSize: 13, color: textMuted, marginBottom: 12 }}>No schemas yet.</div>
             <button onClick={() => router.push("/schema-builder/new")}
-              style={{ padding: "7px 14px", fontSize: 12, background: "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}>
+              style={{ ...btnPrimary, padding: "7px 14px", fontSize: 12 }}>
               Create your first schema →
             </button>
           </div>
@@ -373,56 +383,55 @@ export default function ViewSchemasPage() {
             const schemaTemplates = templatesForSchema(schema.id);
             const fields = schemaFields[schema.id] || [];
             return (
-              <div key={schema.id} style={{ background: "#fff", border: "1px solid #c8c4be", borderRadius: 2 }}>
+              <div key={schema.id} style={{ background: bgCard, border: borderCard, borderRadius: 2 }}>
 
                 {/* Schema row */}
                 <div
                   onClick={() => handleExpand(schema.id)}
                   style={{ display: "flex", alignItems: "center", padding: "12px 16px", cursor: "pointer" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#fafafa")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
-                  <span style={{ fontSize: 11, color: "#aaa", marginRight: 10 }}>
+                  <span style={{ fontSize: 11, color: textDim, marginRight: 10 }}>
                     {expanded === schema.id ? "▾" : "▸"}
                   </span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: "#1a1020" }}>{schema.name}</div>
-                    {schema.description && <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>{schema.description}</div>}
+                    <div style={{ fontSize: 13, fontWeight: 500, color: textPrimary }}>{schema.name}</div>
+                    {schema.description && <div style={{ fontSize: 11, color: textMuted, marginTop: 2 }}>{schema.description}</div>}
                   </div>
-                  <div style={{ fontSize: 10, color: "#aaa", marginRight: 16 }}>
+                  <div style={{ fontSize: 10, color: textLabel, marginRight: 16 }}>
                     {fields.length} field{fields.length !== 1 ? "s" : ""}
                   </div>
-                  <div style={{ fontSize: 10, color: "#aaa", marginRight: 16 }}>
+                  <div style={{ fontSize: 10, color: textLabel, marginRight: 16 }}>
                     {schemaTemplates.length} template{schemaTemplates.length !== 1 ? "s" : ""}
                   </div>
-                  <div style={{ fontSize: 10, color: "#bbb" }}>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.25)" }}>
                     {new Date(schema.created_at).toLocaleDateString()}
                   </div>
                 </div>
 
                 {/* Expanded panel */}
                 {expanded === schema.id && (
-                  <div style={{ borderTop: "1px solid #eee" }}>
+                  <div style={{ borderTop: borderCard }}>
 
                     {/* Fields section */}
-                    <div style={{ borderBottom: schemaTemplates.length > 0 ? "1px solid #f0eeeb" : "none" }}>
+                    <div style={{ borderBottom: schemaTemplates.length > 0 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px 6px" }}>
-                        <div style={{ fontSize: 10, fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: 0.6 }}>
+                        <div style={{ fontSize: 10, fontWeight: 600, color: textLabel, textTransform: "uppercase", letterSpacing: 0.6 }}>
                           Fields
                         </div>
                       </div>
 
                       {fields.length === 0 && (
-                        <div style={{ padding: "4px 14px 10px", fontSize: 11, color: "#bbb" }}>No fields — add one below.</div>
+                        <div style={{ padding: "4px 14px 10px", fontSize: 11, color: textDim }}>No fields — add one below.</div>
                       )}
 
                       {fields.length > 0 && (
                         <>
-                          {/* column headers */}
-                          <div style={{ display: "flex", gap: 8, padding: "4px 14px", background: "#fafafa", borderBottom: "1px solid #f0eeeb" }}>
-                            <span style={{ flex: 1, fontSize: 10, fontWeight: 600, color: "#bbb", textTransform: "uppercase" }}>Field</span>
-                            <span style={{ fontSize: 10, fontWeight: 600, color: "#bbb", textTransform: "uppercase", width: 48 }}>Type</span>
-                            <span style={{ fontSize: 10, fontWeight: 600, color: "#bbb", textTransform: "uppercase", width: 28 }}>Req</span>
+                          <div style={{ display: "flex", gap: 8, padding: "4px 14px", background: "rgba(255,255,255,0.03)", borderBottom: `1px solid ${colorBorderRow}` }}>
+                            <span style={{ flex: 1, fontSize: 10, fontWeight: 600, color: textDim, textTransform: "uppercase" }}>Field</span>
+                            <span style={{ fontSize: 10, fontWeight: 600, color: textDim, textTransform: "uppercase", width: 48 }}>Type</span>
+                            <span style={{ fontSize: 10, fontWeight: 600, color: textDim, textTransform: "uppercase", width: 28 }}>Req</span>
                             <span style={{ width: 110 }} />
                           </div>
                           {fields.map((f) => (
@@ -446,23 +455,23 @@ export default function ViewSchemasPage() {
 
                     {/* Templates section */}
                     <div style={{ padding: "10px 14px 12px" }}>
-                      <div style={{ fontSize: 10, fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 8 }}>Templates</div>
+                      <div style={{ fontSize: 10, fontWeight: 600, color: textLabel, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 8 }}>Templates</div>
                       {schemaTemplates.length === 0 ? (
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <span style={{ fontSize: 11, color: "#bbb" }}>No templates linked to this schema.</span>
+                          <span style={{ fontSize: 11, color: textDim }}>No templates linked to this schema.</span>
                           <button onClick={() => router.push("/template-studio/upload")}
-                            style={{ fontSize: 11, color: "#1a1a2e", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontFamily: "inherit" }}>
+                            style={{ fontSize: 11, color: accentBlue, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontFamily: "inherit" }}>
                             Upload one →
                           </button>
                         </div>
                       ) : (
                         schemaTemplates.map((t) => (
-                          <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", borderBottom: "1px solid #f9f9f9" }}>
-                            <span style={{ flex: 1, fontSize: 11, fontWeight: 500, color: "#1a1020" }}>{t.name}</span>
+                          <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                            <span style={{ flex: 1, fontSize: 11, fontWeight: 500, color: textPrimary }}>{t.name}</span>
                             <StatusBadge status={t.status} />
-                            <span style={{ fontSize: 10, color: "#bbb", marginLeft: 8 }}>{new Date(t.created_at).toLocaleDateString()}</span>
+                            <span style={{ fontSize: 10, color: textDim, marginLeft: 8 }}>{new Date(t.created_at).toLocaleDateString()}</span>
                             <button onClick={() => router.push("/template-studio/templates")}
-                              style={{ fontSize: 11, color: "#666", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontFamily: "inherit" }}>
+                              style={{ fontSize: 11, color: accentBlue, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontFamily: "inherit" }}>
                               Manage →
                             </button>
                           </div>
@@ -474,6 +483,7 @@ export default function ViewSchemasPage() {
               </div>
             );
           })}
+        </div>
         </div>
       </div>
     </NavShell>

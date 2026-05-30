@@ -4,6 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "../../context/UserContext";
 import NavShell from "../../components/NavShell";
+import {
+  bgPrimary, bgCard, bgDeep,
+  textPrimary, textSubtle, textLabel,
+  accentTeal, accentBlue, accentRed,
+  borderCard,
+  btnPrimary, btnDisabled, btnGhost, inputStyle, selectStyle,
+} from "../../theme";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -64,39 +71,43 @@ export default function UploadTemplatePage() {
 
   return (
     <NavShell active="Template Studio">
-      <div style={{ padding: "24px", maxWidth: 560 }}>
-        <div style={{ fontSize: 11, color: "#999", marginBottom: 16, cursor: "pointer" }} onClick={() => router.push("/template-studio")}>
+      <div style={{ background: bgPrimary, flex: 1, padding: "24px" }}>
+        <div style={{ maxWidth: 560 }}>
+        <div
+          style={{ fontSize: 11, color: textLabel, marginBottom: 16, cursor: "pointer" }}
+          onClick={() => router.push("/template-studio")}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = textLabel)}
+        >
           ← Template Studio
         </div>
 
-        <div style={{ fontSize: 20, fontWeight: 500, color: "#1a1020", marginBottom: 4 }}>Upload Template</div>
-        <div style={{ fontSize: 12, color: "#888", marginBottom: 24 }}>Upload a DOCX file with {"{{token}}"} placeholders and link it to a schema.</div>
+        <div style={{ fontSize: 20, fontWeight: 500, color: textPrimary, marginBottom: 4 }}>Upload Template</div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", marginBottom: 24 }}>Upload a DOCX file with {"{{token}}"} placeholders and link it to a schema.</div>
 
-        <div style={{ background: "#fff", border: "1px solid #c8c4be", borderRadius: 2, padding: "20px", marginBottom: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 14 }}>Template Details</div>
+        <div style={{ background: bgCard, border: borderCard, borderRadius: 2, padding: "20px", marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: textLabel, textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 14 }}>Template Details</div>
 
-          {/* Name */}
           <div style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "#555", marginBottom: 4 }}>
-              Template Name <span style={{ color: "#c0392b" }}>*</span>
+            <div style={{ fontSize: 11, fontWeight: 600, color: textSubtle, marginBottom: 4 }}>
+              Template Name <span style={{ color: accentRed }}>*</span>
             </div>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Invoice Template v1"
-              style={{ width: "100%", padding: "7px 10px", fontSize: 12, border: "1px solid #c8c4be", borderRadius: 2, background: "#fafafa", fontFamily: "inherit", outline: "none" }}
+              style={{ ...inputStyle, width: "100%", padding: "7px 10px", fontSize: 12 }}
             />
           </div>
 
-          {/* Schema */}
           <div style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "#555", marginBottom: 4 }}>
-              Schema <span style={{ color: "#c0392b" }}>*</span>
+            <div style={{ fontSize: 11, fontWeight: 600, color: textSubtle, marginBottom: 4 }}>
+              Schema <span style={{ color: accentRed }}>*</span>
             </div>
             {schemas.length === 0 ? (
-              <div style={{ fontSize: 12, color: "#c0392b" }}>
+              <div style={{ fontSize: 12, color: accentRed }}>
                 No schemas found.{" "}
-                <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => router.push("/schema-builder/new")}>
+                <span style={{ cursor: "pointer", textDecoration: "underline", color: accentBlue }} onClick={() => router.push("/schema-builder/new")}>
                   Create one first →
                 </span>
               </div>
@@ -104,7 +115,7 @@ export default function UploadTemplatePage() {
               <select
                 value={schemaId}
                 onChange={(e) => setSchemaId(e.target.value)}
-                style={{ width: "100%", padding: "7px 10px", fontSize: 12, border: "1px solid #c8c4be", borderRadius: 2, background: "#fafafa", fontFamily: "inherit", cursor: "pointer" }}
+                style={{ ...selectStyle, width: "100%", padding: "7px 10px", fontSize: 12 }}
               >
                 <option value="">— select a schema —</option>
                 {schemas.map((s) => (
@@ -114,26 +125,25 @@ export default function UploadTemplatePage() {
             )}
           </div>
 
-          {/* File */}
           <div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "#555", marginBottom: 4 }}>
-              DOCX File <span style={{ color: "#c0392b" }}>*</span>
+            <div style={{ fontSize: 11, fontWeight: 600, color: textSubtle, marginBottom: 4 }}>
+              DOCX File <span style={{ color: accentRed }}>*</span>
             </div>
             <div
               onClick={() => fileRef.current?.click()}
-              style={{ border: "1px dashed #c8c4be", borderRadius: 2, padding: "20px", textAlign: "center", cursor: "pointer", background: file ? "#f0fff4" : "#fafafa" }}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#1a1a2e")}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#c8c4be")}
+              style={{ border: `2px dashed ${file ? accentTeal : "rgba(255,255,255,0.2)"}`, borderRadius: 2, padding: "20px", textAlign: "center", cursor: "pointer", background: file ? "rgba(0,191,179,0.06)" : "rgba(255,255,255,0.03)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = file ? accentTeal : "rgba(255,255,255,0.4)")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = file ? accentTeal : "rgba(255,255,255,0.2)")}
             >
               {file ? (
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: "#2e7d32" }}>📄 {file.name}</div>
-                  <div style={{ fontSize: 11, color: "#999", marginTop: 4 }}>{(file.size / 1024).toFixed(1)} KB — click to change</div>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: accentTeal }}>📄 {file.name}</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", marginTop: 4 }}>{(file.size / 1024).toFixed(1)} KB — click to change</div>
                 </div>
               ) : (
                 <div>
-                  <div style={{ fontSize: 12, color: "#888" }}>Click to select a .docx file</div>
-                  <div style={{ fontSize: 11, color: "#bbb", marginTop: 4 }}>Only .docx files are supported</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.55)" }}>Click to select a .docx file</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>Only .docx files are supported</div>
                 </div>
               )}
             </div>
@@ -147,22 +157,23 @@ export default function UploadTemplatePage() {
           </div>
         </div>
 
-        {error && <div style={{ fontSize: 12, color: "#c62828", marginBottom: 12 }}>{error}</div>}
+        {error && <div style={{ fontSize: 12, color: accentRed, marginBottom: 12 }}>{error}</div>}
 
         <div style={{ display: "flex", gap: 8 }}>
           <button
             onClick={() => router.push("/template-studio")}
-            style={{ padding: "8px 16px", fontSize: 12, background: "#f0eeeb", border: "1px solid #c8c4be", borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+            style={{ ...btnGhost, padding: "8px 16px", fontSize: 12 }}
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={saving}
-            style={{ padding: "8px 20px", fontSize: 12, fontWeight: 600, background: saving ? "#ccc" : "#1a1a2e", color: "#fff", border: "none", borderRadius: 2, cursor: saving ? "not-allowed" : "pointer", fontFamily: "inherit" }}
+            style={{ ...(saving ? btnDisabled : btnPrimary), padding: "8px 20px", fontSize: 12 }}
           >
             {saving ? "Uploading..." : "Upload Template →"}
           </button>
+        </div>
         </div>
       </div>
     </NavShell>

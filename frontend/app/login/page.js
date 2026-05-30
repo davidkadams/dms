@@ -3,6 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "../context/UserContext";
+import {
+  bgPrimary, bgCard, bgDeep,
+  textPrimary, textMuted, textLabel,
+  accentRed, borderCard,
+  btnPrimary, btnDisabled, selectStyle,
+} from "../theme";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -31,7 +37,7 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "#f0eeeb",
+      background: bgPrimary,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -40,32 +46,32 @@ export default function LoginPage() {
       {/* Logo */}
       <div style={{ marginBottom: 32, textAlign: "center" }}>
         <div style={{ fontSize: 13, color: "#a0a0c0", marginBottom: 4 }}>📄</div>
-        <div style={{ fontSize: 22, fontWeight: 600, color: "#1a1a2e", letterSpacing: -0.5 }}>
+        <div style={{ fontSize: 22, fontWeight: 600, color: textPrimary, letterSpacing: -0.5 }}>
           rescribe.io
         </div>
-        <div style={{ fontSize: 12, color: "#888", marginTop: 4 }}>
+        <div style={{ fontSize: 12, color: textMuted, marginTop: 4 }}>
           Document automation platform
         </div>
       </div>
 
       {/* Card */}
       <div style={{
-        background: "#fff",
-        border: "1px solid #c8c4be",
+        background: bgCard,
+        border: borderCard,
         borderRadius: 4,
         padding: "28px 32px",
         width: 320,
       }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "#1a1020", marginBottom: 16 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: textPrimary, marginBottom: 16 }}>
           Select your account
         </div>
 
         {loading && (
-          <div style={{ fontSize: 12, color: "#888" }}>Loading users...</div>
+          <div style={{ fontSize: 12, color: textMuted }}>Loading users...</div>
         )}
 
         {error && (
-          <div style={{ fontSize: 12, color: "#c0392b" }}>{error}</div>
+          <div style={{ fontSize: 12, color: accentRed }}>{error}</div>
         )}
 
         {!loading && !error && (
@@ -73,18 +79,7 @@ export default function LoginPage() {
             <select
               value={selectedId}
               onChange={(e) => setSelectedId(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "7px 10px",
-                fontSize: 12,
-                border: "1px solid #c8c4be",
-                borderRadius: 2,
-                background: "#fafafa",
-                color: "#1a1020",
-                marginBottom: 16,
-                fontFamily: "inherit",
-                cursor: "pointer",
-              }}
+              style={{ ...selectStyle, width: "100%", padding: "7px 10px", fontSize: 12, marginBottom: 16 }}
             >
               <option value="">— choose a user —</option>
               {users.map((u) => (
@@ -97,18 +92,7 @@ export default function LoginPage() {
             <button
               onClick={handleLogin}
               disabled={!selectedId}
-              style={{
-                width: "100%",
-                padding: "8px",
-                background: selectedId ? "#1a1a2e" : "#ccc",
-                color: "#fff",
-                border: "none",
-                borderRadius: 2,
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: selectedId ? "pointer" : "not-allowed",
-                fontFamily: "inherit",
-              }}
+              style={{ ...(selectedId ? btnPrimary : btnDisabled), width: "100%", padding: "8px", fontSize: 12 }}
             >
               Continue →
             </button>
