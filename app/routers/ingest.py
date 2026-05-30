@@ -1,11 +1,13 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, Header, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.schema import Schema
 from app.models.schema_field import SchemaField
 from app.models.data_instance import DataInstance
 from app.models.field_value import FieldValue
+from app.models.user import User
+from app.dependencies.auth import get_current_user
 from app.services.text_extractor import extract_text
 from app.services.llm_extractor import match_schema, extract_fields
 
@@ -15,12 +17,8 @@ router = APIRouter()
 @router.post("/prepare")
 async def prepare_document(
     file: UploadFile = File(...),
-    x_user_id: UUID = Header(...),
+    current_user: User = Depends(get_current_user),
 ):
-    """
-    Extract text from a document without running LLM matching.
-    Used when the user already knows which schema to use.
-    """
     content = await file.read()
     try:
         document_text = extract_text(content, file.filename)
@@ -32,20 +30,16 @@ async def prepare_document(
 @router.post("/match")
 async def match_document(
     file: UploadFile = File(...),
-    x_user_id: UUID = Header(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Step 1: Upload a document. Returns the best matching schema (if any)
-    and suggested fields if no match is found.
-    """
     content = await file.read()
     try:
         document_text = extract_text(content, file.filename)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    schemas = db.query(Schema).filter(Schema.created_by == x_user_id).all()
+    schemas = db.query(Schema).filter(Schema.created_by == current_user.id).all()
     schema_dicts = []
     for s in schemas:
         fields = db.query(SchemaField).filter(SchemaField.schema_id == s.id).all()
@@ -71,13 +65,9 @@ async def extract_document(
     schema_id: str = Form(...),
     label: str = Form(...),
     document_text: str = Form(...),
-    x_user_id: UUID = Header(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Step 2: Given a confirmed schema_id and the document text from step 1,
-    extract field values and create a data instance.
-    """
     schema_uuid = UUID(schema_id)
     schema = db.get(Schema, schema_uuid)
     if not schema:
@@ -108,7 +98,7 @@ async def extract_document(
         label=label,
         source="extracted",
         status="pending_validation",
-        created_by=x_user_id,
+        created_by=current_user.id,
     )
     db.add(instance)
     db.flush()

@@ -1,10 +1,12 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.data_instance import DataInstance
 from app.models.generated_document import GeneratedDocument
 from app.models.template import Template
+from app.models.user import User
+from app.dependencies.auth import get_current_user
 from app.schemas_pydantic.document import GenerateDocumentRequest, GeneratedDocumentResponse
 from fastapi.responses import Response
 from app.services.document_renderer import render_document
@@ -16,7 +18,7 @@ router = APIRouter()
 @router.post("/generate", response_model=GeneratedDocumentResponse, status_code=201)
 def generate_document(
     payload: GenerateDocumentRequest,
-    x_user_id: UUID = Header(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     template = db.get(Template, payload.template_id)
@@ -32,7 +34,7 @@ def generate_document(
         template_id=payload.template_id,
         data_instance_id=payload.data_instance_id,
         s3_key=s3_key,
-        created_by=x_user_id,
+        created_by=current_user.id,
     )
     db.add(doc)
     instance.status = "processed"
@@ -43,16 +45,12 @@ def generate_document(
 
 @router.post("/generate-bulk")
 def generate_bulk(
-    x_user_id: UUID = Header(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Generate documents for all validated instances that have a default template.
-    Skips instances where no active default template exists for the schema.
-    """
     validated = (
         db.query(DataInstance)
-        .filter(DataInstance.created_by == x_user_id, DataInstance.status == "validated")
+        .filter(DataInstance.created_by == current_user.id, DataInstance.status == "validated")
         .all()
     )
 
@@ -83,7 +81,7 @@ def generate_bulk(
             template_id=default_template.id,
             data_instance_id=instance.id,
             s3_key=s3_key,
-            created_by=x_user_id,
+            created_by=current_user.id,
         )
         db.add(doc)
         instance.status = "processed"

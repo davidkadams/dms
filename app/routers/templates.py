@@ -1,9 +1,11 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, Header, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.template import Template
 from app.models.token_mapping import TokenMapping
+from app.models.user import User
+from app.dependencies.auth import get_current_user
 from app.schemas_pydantic.template import TemplateResponse, TemplateUpdate, TokenMappingCreate, TokenMappingResponse
 from fastapi.responses import Response
 from app.services.s3 import delete_file, download_file, generate_presigned_url, upload_file
@@ -16,14 +18,14 @@ async def create_template(
     name: str = Form(...),
     schema_id: UUID = Form(...),
     file: UploadFile = File(...),
-    x_user_id: UUID = Header(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     content = await file.read()
     s3_key = f"templates/{schema_id}/{file.filename}"
     upload_file(content, s3_key, content_type=file.content_type or "application/octet-stream")
     try:
-        template = Template(name=name, schema_id=schema_id, s3_key=s3_key, created_by=x_user_id)
+        template = Template(name=name, schema_id=schema_id, s3_key=s3_key, created_by=current_user.id)
         db.add(template)
         db.commit()
         db.refresh(template)
@@ -90,7 +92,6 @@ def set_default_template(template_id: UUID, db: Session = Depends(get_db)):
     template = db.get(Template, template_id)
     if not template:
         raise HTTPException(status_code=404, detail="Template not found")
-    # Clear any existing default for this schema, then set this one
     db.query(Template).filter(
         Template.schema_id == template.schema_id,
         Template.is_default == True,
@@ -117,12 +118,12 @@ def get_template_file(template_id: UUID, db: Session = Depends(get_db)):
 def add_token_mapping(
     template_id: UUID,
     payload: TokenMappingCreate,
-    x_user_id: UUID = Header(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     if not db.get(Template, template_id):
         raise HTTPException(status_code=404, detail="Template not found")
-    mapping = TokenMapping(**payload.model_dump(), template_id=template_id, created_by=x_user_id)
+    mapping = TokenMapping(**payload.model_dump(), template_id=template_id, created_by=current_user.id)
     db.add(mapping)
     db.commit()
     db.refresh(mapping)

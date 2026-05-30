@@ -1,9 +1,11 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.schema import Schema
 from app.models.schema_field import SchemaField
+from app.models.user import User
+from app.dependencies.auth import get_current_user
 from app.schemas_pydantic.schema import (
     SchemaCreate,
     SchemaResponse,
@@ -18,12 +20,12 @@ router = APIRouter()
 @router.post("/", response_model=SchemaResponse, status_code=201)
 def create_schema(
     payload: SchemaCreate,
-    x_user_id: UUID = Header(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     if db.query(Schema).filter(Schema.name == payload.name).first():
         raise HTTPException(status_code=409, detail="Schema name already exists")
-    schema = Schema(**payload.model_dump(), created_by=x_user_id)
+    schema = Schema(**payload.model_dump(), created_by=current_user.id)
     db.add(schema)
     db.commit()
     db.refresh(schema)
@@ -47,12 +49,12 @@ def get_schema(schema_id: UUID, db: Session = Depends(get_db)):
 def add_field(
     schema_id: UUID,
     payload: SchemaFieldCreate,
-    x_user_id: UUID = Header(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     if not db.get(Schema, schema_id):
         raise HTTPException(status_code=404, detail="Schema not found")
-    field = SchemaField(**payload.model_dump(), schema_id=schema_id, created_by=x_user_id)
+    field = SchemaField(**payload.model_dump(), schema_id=schema_id, created_by=current_user.id)
     db.add(field)
     db.commit()
     db.refresh(field)

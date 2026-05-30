@@ -30,7 +30,7 @@ function StatusBadge({ status }) {
 }
 
 function FieldRow({ field, schemaId, onSaved, onDeleted }) {
-  const { user } = useUser();
+  const { user, authHeaders } = useUser();
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -46,7 +46,7 @@ function FieldRow({ field, schemaId, onSaved, onDeleted }) {
     setSaving(true);
     const res = await fetch(`${API}/schemas/${schemaId}/fields/${field.id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", "x-user-id": user.id },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         label: label.trim() || undefined,
         field_type: fieldType,
@@ -63,7 +63,7 @@ function FieldRow({ field, schemaId, onSaved, onDeleted }) {
     setDeleting(true);
     await fetch(`${API}/schemas/${schemaId}/fields/${field.id}`, {
       method: "DELETE",
-      headers: { "x-user-id": user.id },
+      headers: authHeaders(),
     });
     onDeleted(field.id);
   };
@@ -167,7 +167,7 @@ function FieldRow({ field, schemaId, onSaved, onDeleted }) {
 }
 
 function AddFieldForm({ schemaId, fieldCount, onAdded }) {
-  const { user } = useUser();
+  const { user, authHeaders } = useUser();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [name, setName] = useState("");
@@ -186,7 +186,7 @@ function AddFieldForm({ schemaId, fieldCount, onAdded }) {
     setError("");
     const res = await fetch(`${API}/schemas/${schemaId}/fields`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-user-id": user.id },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         name: name.trim(),
         label: label.trim(),
@@ -284,7 +284,7 @@ function AddFieldForm({ schemaId, fieldCount, onAdded }) {
 }
 
 export default function ViewSchemasPage() {
-  const { user } = useUser();
+  const { user, authHeaders } = useUser();
   const router = useRouter();
   const [schemas, setSchemas] = useState([]);
   const [templates, setTemplates] = useState([]);

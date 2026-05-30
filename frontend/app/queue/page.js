@@ -39,7 +39,7 @@ function SourceBadge({ source }) {
 }
 
 export default function QueuePage() {
-  const { user } = useUser();
+  const { user, authHeaders } = useUser();
   const router = useRouter();
 
   const [instances, setInstances] = useState([]);
@@ -60,7 +60,7 @@ export default function QueuePage() {
     try {
       const res = await fetch(`${API}/documents/generate-bulk`, {
         method: "POST",
-        headers: { "x-user-id": user.id },
+        headers: authHeaders(),
       });
       const data = await res.json();
       setBulkResult(data);

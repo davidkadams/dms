@@ -15,7 +15,7 @@ import {
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function UploadTemplatePage() {
-  const { user } = useUser();
+  const { user, authHeaders } = useUser();
   const router = useRouter();
   const fileRef = useRef(null);
 
@@ -52,7 +52,7 @@ export default function UploadTemplatePage() {
 
       const res = await fetch(`${API}/templates/`, {
         method: "POST",
-        headers: { "x-user-id": user.id },
+        headers: authHeaders(),
         body: formData,
       });
 

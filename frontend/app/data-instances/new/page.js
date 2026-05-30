@@ -36,7 +36,7 @@ function FieldInput({ field, value, onChange }) {
 }
 
 export default function NewDataInstancePage() {
-  const { user } = useUser();
+  const { user, authHeaders } = useUser();
   const router = useRouter();
 
   const [schemas, setSchemas] = useState([]);
@@ -86,7 +86,7 @@ export default function NewDataInstancePage() {
 
       const res = await fetch(`${API}/data-instances/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user-id": user.id },
+        headers: authHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ schema_id: selectedSchema.id, label: label.trim(), field_values }),
       });
 
