@@ -21,7 +21,7 @@ function highlightTokens(html) {
 }
 
 export default function EditTemplatePage() {
-  const { user } = useUser();
+  const { user, authHeaders } = useUser();
   const router = useRouter();
   const { templateId } = useParams();
 
@@ -120,7 +120,7 @@ export default function EditTemplatePage() {
     try {
       const res = await fetch(`${API}/templates/${templateId}/token-mappings`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user-id": user.id },
+        headers: authHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ token: newToken.trim(), schema_field_id: newFieldId }),
       });
       if (!res.ok) {

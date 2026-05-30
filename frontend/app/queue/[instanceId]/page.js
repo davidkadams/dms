@@ -41,7 +41,7 @@ function MetaRow({ label, value }) {
 }
 
 export default function DataInstanceDetailPage() {
-  const { user } = useUser();
+  const { user, authHeaders } = useUser();
   const router = useRouter();
   const { instanceId } = useParams();
 
@@ -64,11 +64,9 @@ export default function DataInstanceDetailPage() {
     if (!user) { router.push("/login"); return; }
     Promise.all([
       fetch(`${API}/data-instances/${instanceId}`).then((r) => r.json()),
-      fetch(`${API}/auth/users`).then((r) => r.json()),
-    ]).then(async ([inst, allUsers]) => {
+    ]).then(async ([inst]) => {
       setInstance(inst);
-      const userMap = Object.fromEntries(allUsers.map((u) => [u.id, u.name]));
-      setUsers(userMap);
+      setUsers({ [user.id]: user.name });
       const [sc, f, tmpl] = await Promise.all([
         fetch(`${API}/schemas/${inst.schema_id}`).then((r) => r.json()),
         fetch(`${API}/schemas/${inst.schema_id}/fields`).then((r) => r.json()),
@@ -89,7 +87,7 @@ export default function DataInstanceDetailPage() {
     setValidating(true);
     const res = await fetch(`${API}/data-instances/${instanceId}/validate`, {
       method: "PATCH",
-      headers: { "x-user-id": user.id },
+      headers: authHeaders(),
     });
     const updated = await res.json();
     setInstance(updated);
@@ -105,7 +103,7 @@ export default function DataInstanceDetailPage() {
     try {
       const res = await fetch(`${API}/documents/generate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user-id": user.id },
+        headers: authHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ template_id: selectedTemplate, data_instance_id: instanceId }),
       });
       if (!res.ok) {

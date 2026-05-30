@@ -1,10 +1,12 @@
 from uuid import UUID
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.data_instance import DataInstance
 from app.models.field_value import FieldValue
+from app.models.user import User
+from app.dependencies.auth import get_current_user
 from app.schemas_pydantic.data_instance import DataInstanceCreate, DataInstanceResponse
 
 router = APIRouter()
@@ -13,10 +15,10 @@ router = APIRouter()
 @router.post("/", response_model=DataInstanceResponse, status_code=201)
 def create_data_instance(
     payload: DataInstanceCreate,
-    x_user_id: UUID = Header(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    instance = DataInstance(schema_id=payload.schema_id, label=payload.label, created_by=x_user_id)
+    instance = DataInstance(schema_id=payload.schema_id, label=payload.label, created_by=current_user.id)
     db.add(instance)
     db.flush()
     for fv in payload.field_values:
@@ -45,7 +47,7 @@ def get_data_instance(instance_id: UUID, db: Session = Depends(get_db)):
 @router.patch("/{instance_id}/validate", response_model=DataInstanceResponse)
 def validate_data_instance(
     instance_id: UUID,
-    x_user_id: UUID = Header(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     instance = db.get(DataInstance, instance_id)
@@ -54,7 +56,7 @@ def validate_data_instance(
     if instance.status == "processed":
         raise HTTPException(status_code=400, detail="Cannot validate an already processed instance")
     instance.status = "validated"
-    instance.validated_by = x_user_id
+    instance.validated_by = current_user.id
     instance.validated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(instance)

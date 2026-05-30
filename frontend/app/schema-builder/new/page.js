@@ -72,7 +72,7 @@ function FieldRow({ field, index, onChange, onRemove }) {
 }
 
 export default function NewSchemaPage() {
-  const { user } = useUser();
+  const { user, authHeaders } = useUser();
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -102,7 +102,7 @@ export default function NewSchemaPage() {
     try {
       const schemaRes = await fetch(`${API}/schemas/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user-id": user.id },
+        headers: authHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ name: name.trim(), description: description.trim() || null }),
       });
       if (!schemaRes.ok) {
@@ -116,7 +116,7 @@ export default function NewSchemaPage() {
         if (!f.name.trim() || !f.label.trim()) continue;
         await fetch(`${API}/schemas/${schema.id}/fields`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", "x-user-id": user.id },
+          headers: authHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ ...f, name: f.name.trim(), label: f.label.trim(), display_order: i }),
         });
       }

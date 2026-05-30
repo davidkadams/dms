@@ -45,7 +45,7 @@ function StepIndicator({ current }) {
 }
 
 export default function IngestPage() {
-  const { user } = useUser();
+  const { user, authHeaders } = useUser();
   const router = useRouter();
   const fileRef = useRef(null);
 
@@ -122,7 +122,7 @@ export default function IngestPage() {
     form.append("file", file);
     try {
       if (preSelectedSchemaId) {
-        const res = await fetch(`${API}/ingest/prepare`, { method: "POST", headers: { "x-user-id": user.id }, body: form });
+        const res = await fetch(`${API}/ingest/prepare`, { method: "POST", headers: authHeaders(), body: form });
         if (!res.ok) { const e = await res.json(); setError(e.detail || "Failed to read document."); setMatching(false); return; }
         const result = await res.json();
         setMatchResult({ document_text: result.document_text, filename: result.filename, matched_schema_id: preSelectedSchemaId, confidence: 100, reason: "Schema manually selected.", suggested_fields: [] });
@@ -131,7 +131,7 @@ export default function IngestPage() {
         setLabel(file.name.replace(/\.[^.]+$/, ""));
         setStep(1);
       } else {
-        const res = await fetch(`${API}/ingest/match`, { method: "POST", headers: { "x-user-id": user.id }, body: form });
+        const res = await fetch(`${API}/ingest/match`, { method: "POST", headers: authHeaders(), body: form });
         if (!res.ok) { const e = await res.json(); setError(e.detail || "Failed to analyse document."); setMatching(false); return; }
         const result = await res.json();
         setMatchResult(result);
@@ -171,7 +171,7 @@ export default function IngestPage() {
     form.append("label", label.trim());
     form.append("document_text", matchResult.document_text);
     try {
-      const res = await fetch(`${API}/ingest/extract`, { method: "POST", headers: { "x-user-id": user.id }, body: form });
+      const res = await fetch(`${API}/ingest/extract`, { method: "POST", headers: authHeaders(), body: form });
       clearInterval(loadingIntervalRef.current);
       if (!res.ok) { const e = await res.json(); setError(e.detail || "Extraction failed."); setExtracting(false); return; }
       const result = await res.json();
