@@ -3,35 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "../context/UserContext";
+import {
+  bgPrimary, bgCard, borderCard,
+  textPrimary, textMuted, textLabel,
+  accentRed, btnPrimary, btnDisabled, inputStyle,
+} from "../theme";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-const inputStyle = {
-  width: "100%",
-  padding: "7px 10px",
-  fontSize: 12,
-  border: "1px solid #c8c4be",
-  borderRadius: 2,
-  background: "#fafafa",
-  color: "#1a1020",
-  marginBottom: 12,
-  fontFamily: "inherit",
-  boxSizing: "border-box",
-};
-
-const btnStyle = (disabled) => ({
-  width: "100%",
-  padding: "8px",
-  background: disabled ? "#ccc" : "#1a1a2e",
-  color: "#fff",
-  border: "none",
-  borderRadius: 2,
-  fontSize: 12,
-  fontWeight: 600,
-  cursor: disabled ? "not-allowed" : "pointer",
-  fontFamily: "inherit",
-  marginTop: 4,
-});
+const normalizeDetail = (detail, fallback) =>
+  Array.isArray(detail) ? detail.map((e) => e.msg).join(", ") : (detail || fallback);
 
 export default function LoginPage() {
   const { login } = useUser();
@@ -47,9 +28,7 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     const endpoint = mode === "login" ? "/auth/login" : "/auth/register";
-    const body = mode === "login"
-      ? { email, password }
-      : { email, password, name };
+    const body = mode === "login" ? { email, password } : { email, password, name };
 
     try {
       const res = await fetch(`${API}${endpoint}`, {
@@ -59,7 +38,7 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.detail || "Something went wrong.");
+        setError(normalizeDetail(data.detail, "Something went wrong."));
         setLoading(false);
         return;
       }
@@ -71,14 +50,12 @@ export default function LoginPage() {
     }
   };
 
-  const ready = mode === "login"
-    ? email && password
-    : email && password && name;
+  const ready = mode === "login" ? email && password : email && password && name;
 
   return (
     <div style={{
       minHeight: "100vh",
-      background: "#f0eeeb",
+      background: bgPrimary,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -86,22 +63,22 @@ export default function LoginPage() {
     }}>
       <div style={{ marginBottom: 32, textAlign: "center" }}>
         <div style={{ fontSize: 13, color: "#a0a0c0", marginBottom: 4 }}>📄</div>
-        <div style={{ fontSize: 22, fontWeight: 600, color: "#1a1a2e", letterSpacing: -0.5 }}>
+        <div style={{ fontSize: 22, fontWeight: 600, color: textPrimary, letterSpacing: -0.5 }}>
           rescribe.io
         </div>
-        <div style={{ fontSize: 12, color: "#888", marginTop: 4 }}>
+        <div style={{ fontSize: 12, color: textMuted, marginTop: 4 }}>
           Document automation platform
         </div>
       </div>
 
       <div style={{
-        background: "#fff",
-        border: "1px solid #c8c4be",
+        background: bgCard,
+        border: borderCard,
         borderRadius: 4,
         padding: "28px 32px",
         width: 320,
       }}>
-        <div style={{ display: "flex", marginBottom: 20, borderBottom: "1px solid #e8e4de" }}>
+        <div style={{ display: "flex", marginBottom: 20, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
           {["login", "register"].map((m) => (
             <button
               key={m}
@@ -111,10 +88,10 @@ export default function LoginPage() {
                 padding: "6px 0",
                 background: "none",
                 border: "none",
-                borderBottom: mode === m ? "2px solid #1a1a2e" : "2px solid transparent",
+                borderBottom: mode === m ? `2px solid ${textPrimary}` : "2px solid transparent",
                 fontSize: 12,
                 fontWeight: mode === m ? 600 : 400,
-                color: mode === m ? "#1a1a2e" : "#888",
+                color: mode === m ? textPrimary : textLabel,
                 cursor: "pointer",
                 fontFamily: "inherit",
                 textTransform: "capitalize",
@@ -132,7 +109,7 @@ export default function LoginPage() {
             placeholder="Full name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            style={inputStyle}
+            style={{ ...inputStyle, width: "100%", padding: "7px 10px", fontSize: 12, marginBottom: 12 }}
           />
         )}
 
@@ -141,7 +118,7 @@ export default function LoginPage() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          style={inputStyle}
+          style={{ ...inputStyle, width: "100%", padding: "7px 10px", fontSize: 12, marginBottom: 12 }}
           onKeyDown={(e) => e.key === "Enter" && ready && handleSubmit()}
         />
 
@@ -150,18 +127,18 @@ export default function LoginPage() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={inputStyle}
+          style={{ ...inputStyle, width: "100%", padding: "7px 10px", fontSize: 12, marginBottom: 12 }}
           onKeyDown={(e) => e.key === "Enter" && ready && handleSubmit()}
         />
 
         {error && (
-          <div style={{ fontSize: 11, color: "#c0392b", marginBottom: 8 }}>{error}</div>
+          <div style={{ fontSize: 11, color: accentRed, marginBottom: 8 }}>{error}</div>
         )}
 
         <button
           onClick={handleSubmit}
           disabled={!ready || loading}
-          style={btnStyle(!ready || loading)}
+          style={{ ...(!ready || loading ? btnDisabled : btnPrimary), width: "100%", padding: "8px", fontSize: 12, marginTop: 4 }}
         >
           {loading ? "Please wait..." : mode === "login" ? "Sign in →" : "Create account →"}
         </button>

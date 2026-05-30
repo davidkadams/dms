@@ -107,7 +107,7 @@ export default function NewSchemaPage() {
       });
       if (!schemaRes.ok) {
         const err = await schemaRes.json();
-        throw new Error(err.detail || "Failed to create schema");
+        throw new Error(Array.isArray(err.detail) ? err.detail.map((e) => e.msg).join(", ") : (err.detail || "Failed to create schema"));
       }
       const schema = await schemaRes.json();
 

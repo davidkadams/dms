@@ -108,7 +108,7 @@ export default function DataInstanceDetailPage() {
       });
       if (!res.ok) {
         const err = await res.json();
-        setGenerateError(err.detail || "Generation failed.");
+        setGenerateError(Array.isArray(err.detail) ? err.detail.map((e) => e.msg).join(", ") : (err.detail || "Generation failed."));
         setGenerating(false);
         return;
       }

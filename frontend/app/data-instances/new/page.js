@@ -92,7 +92,7 @@ export default function NewDataInstancePage() {
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.detail || "Failed to create instance");
+        throw new Error(Array.isArray(err.detail) ? err.detail.map((e) => e.msg).join(", ") : (err.detail || "Failed to create instance"));
       }
 
       router.push("/queue");

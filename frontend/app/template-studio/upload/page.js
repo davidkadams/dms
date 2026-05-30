@@ -58,7 +58,7 @@ export default function UploadTemplatePage() {
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.detail || "Upload failed");
+        throw new Error(Array.isArray(err.detail) ? err.detail.map((e) => e.msg).join(", ") : (err.detail || "Upload failed"));
       }
 
       router.push("/template-studio/templates");

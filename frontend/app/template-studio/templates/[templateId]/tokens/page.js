@@ -125,7 +125,7 @@ export default function EditTemplatePage() {
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.detail || "Failed to add mapping");
+        throw new Error(Array.isArray(err.detail) ? err.detail.map((e) => e.msg).join(", ") : (err.detail || "Failed to add mapping"));
       }
       const mapping = await res.json();
       setMappings([...mappings, mapping]);
