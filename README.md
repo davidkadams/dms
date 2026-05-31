@@ -4,6 +4,11 @@ David's Evil Creation
 
 FastAPI + PostgreSQL + S3 service for building, tagging, and rendering document templates.
 
+# TO DO
+
+Bugs
+- when adding a new schema field, the regular entry does not allow for the Ai prompt text boxes, but it appears when you 'edit" schema.
+
 # Workflow Visualzation
 
 ```mermaid
